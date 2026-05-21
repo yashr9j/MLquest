@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ML Quest — Desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900;1000&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#58cc02;--gd:#46a302;--gl:#d7ffb8;--gll:#f0fff4;
+  --b:#1cb0f6;--bd:#0d8fc3;--bl:#ddf4ff;
+  --r:#ff4b4b;--rd:#d93636;--rl:#ffdfe0;
+  --y:#ffc800;--yd:#e6a700;--yl:#fff0b3;
+  --p:#ce82ff;--pd:#9b00e8;--pl:#f0d9ff;
+  --o:#ff9600;--od:#db7300;--ol:#fff0d3;
+  --bg:#fff;--bg2:#f7f7f7;--bg3:#efefef;
+  --brd:#e5e5e5;--brd2:#d0d0d0;
+  --txt:#3c3c3c;--txt2:#777;--txt3:#afafaf;
+  --card-sh:0 3px 0;--card-sh-c:#d8d8d8;
+  --font:'Nunito',sans-serif;
+  --sp:cubic-bezier(.34,1.56,.64,1);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --topH:64px;--sideW:200px;--pathW:360px;
+}
+[data-theme="dark"]{
+  --bg:#1a1a2e;--bg2:#16213e;--bg3:#0f3460;
+  --brd:#2a2a4a;--brd2:#3a3a6a;
+  --txt:#e8e8f0;--txt2:#9090b8;--txt3:#5a5a8a;
+  --card-sh-c:#0a0a1a;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);color:var(--txt);background:var(--bg2);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;transition:background .3s,color .3s}
+button{font-family:var(--font);cursor:pointer;border:none;background:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--txt3)}
+
+/* ── TOP BAR ─────────────────────────────────────────────── */
+#topbar{
+  flex-shrink:0;height:var(--topH);
+  background:var(--bg);border-bottom:2px solid var(--brd);
+  display:flex;align-items:center;padding:0 24px;gap:14px;
+  z-index:100;transition:background .3s,border-color .3s;
+}
+.t-logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.t-logo-ico{font-size:24px}
+.t-logo-txt{font-size:20px;font-weight:900;color:var(--g);letter-spacing:-.5px}
+.t-logo-txt b{color:var(--txt);font-weight:900}
+.t-divider{width:2px;height:28px;background:var(--brd);flex-shrink:0;border-radius:1px}
+
+/* XP section in topbar */
+.t-xp{display:flex;align-items:center;gap:10px;flex:1;max-width:460px}
+.t-badge{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:var(--g);border:3px solid var(--gd);box-shadow:0 3px 0 var(--gd);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:900;color:#fff;
+  transition:transform .2s var(--sp);
+}
+.t-badge.pop{animation:lvlpop .5s var(--sp)}
+.t-xp-col{flex:1;min-width:0}
+.t-xp-name{font-size:11px;font-weight:800;color:var(--txt3);letter-spacing:.3px;text-transform:uppercase;margin-bottom:3px}
+.t-xp-bar{height:11px;background:var(--bg3);border-radius:100px;border:2px solid var(--brd);overflow:hidden}
+.t-xp-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--g),#80e000);transition:width .8s var(--sp);position:relative}
+.t-xp-fill::after{content:'';position:absolute;top:2px;left:6px;right:6px;height:3px;background:rgba(255,255,255,.35);border-radius:100px}
+.t-xp-lbl{font-size:11px;font-weight:800;color:var(--txt3);white-space:nowrap;flex-shrink:0}
+
+.t-gap{flex:1}
+/* stat chips in topbar */
+.t-stat{
+  display:flex;align-items:center;gap:5px;
+  background:var(--bg2);border:2px solid var(--brd);
+  border-radius:100px;padding:6px 12px;
+  font-size:14px;font-weight:800;
+  cursor:pointer;transition:transform .12s,background .2s,border-color .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.t-stat:hover{background:var(--bg3)}
+.t-stat:active{transform:scale(.93)}
+.t-stat.fire{color:var(--o)}.t-stat.gem{color:var(--p)}.t-stat.xp{color:var(--b)}
+/* dark mode btn */
+.t-dm{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--bg2);border:2px solid var(--brd);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;transition:transform .15s var(--sp),background .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.t-dm:hover{transform:scale(1.1) rotate(12deg)}
+.t-dm:active{transform:scale(.9)}
+
+/* ── BODY (sidebar + content) ─────────────────────────────── */
+#body{flex:1;display:flex;overflow:hidden;min-height:0}
+
+/* ── LEFT SIDEBAR ─────────────────────────────────────────── */
+#sidebar{
+  width:var(--sideW);flex-shrink:0;
+  background:var(--bg);border-right:2px solid var(--brd);
+  display:flex;flex-direction:column;overflow:hidden;
+  height:100%;
+  transition:background .3s,border-color .3s;
+}
+.sb-nav{padding:12px 10px;display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.sb-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-radius:14px;
+  font-size:15px;font-weight:800;color:var(--txt2);
+  width:100%;text-align:left;
+  transition:background .15s,color .15s,transform .1s;
+  -webkit-tap-highlight-color:transparent;
+}
+.sb-btn:hover{background:var(--bg2);color:var(--txt)}
+.sb-btn:active{transform:scale(.97)}
+.sb-btn.active{background:var(--gl);color:var(--gd)}
+[data-theme="dark"] .sb-btn.active{background:#0d2010;color:var(--g)}
+.sb-ico{font-size:20px;width:24px;text-align:center;flex-shrink:0}
+.sb-dot{width:7px;height:7px;border-radius:50%;background:var(--g);margin-left:auto;opacity:0;transition:opacity .2s;flex-shrink:0}
+.sb-btn.active .sb-dot{opacity:1}
+
+/* sidebar phase progress mini-list */
+.sb-phases{padding:0 14px 14px;border-top:2px solid var(--brd);overflow-y:auto;flex:1;min-height:0}
+.sb-phases-title{font-size:10px;font-weight:900;color:var(--txt3);letter-spacing:1.2px;text-transform:uppercase;padding:12px 0 8px}
+.sb-phase-row{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;border-radius:10px;padding:5px 8px;transition:background .15s}
+.sb-phase-row:hover{background:var(--bg2)}
+.sb-ph-ico{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+.sb-ph-name{font-size:12px;font-weight:700;color:var(--txt2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-ph-bar{flex:1;height:6px;background:var(--bg3);border-radius:100px;overflow:hidden;max-width:60px}
+.sb-ph-fill{height:100%;border-radius:100px;transition:width .5s var(--sp)}
+.sb-ph-pct{font-size:10px;font-weight:900;min-width:26px;text-align:right}
+
+/* sidebar footer */
+.sb-foot{
+  padding:12px 14px;border-top:2px solid var(--brd);
+  display:flex;flex-direction:column;gap:8px;
+  transition:border-color .3s;
+}
+.sb-streak-card{
+  background:linear-gradient(135deg,var(--o),var(--y));
+  border-radius:14px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;transition:transform .12s;box-shadow:0 3px 0 var(--od);
+  -webkit-tap-highlight-color:transparent;
+}
+.sb-streak-card:hover{transform:translateY(-2px)}
+.sb-streak-card:active{transform:translateY(1px)}
+.sb-streak-ico{font-size:22px;flex-shrink:0}
+.sb-streak-val{font-size:20px;font-weight:900;color:#fff;line-height:1}
+.sb-streak-lbl{font-size:10px;font-weight:900;color:rgba(255,255,255,.75);letter-spacing:.5px;text-transform:uppercase;margin-top:1px}
+
+/* ── CONTENT AREA ─────────────────────────────────────────── */
+#content{flex:1;display:flex;overflow:hidden;position:relative;min-height:0;min-width:0}
+
+/* each page — all stack on top of each other, active one is visible */
+.view{
+  position:absolute;inset:0;
+  display:flex;overflow:hidden;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s var(--ease),transform .18s var(--ease);
+  transform:translateX(16px);
+}
+.view.active{
+  opacity:1;pointer-events:all;transform:none;
+  /* stay absolute — inset:0 gives it the full parent height */
+}
+
+/* ── LEARN VIEW: path col + detail panel ──────────────────── */
+#v-learn{gap:0}
+.path-col{
+  width:var(--pathW);flex-shrink:0;
+  height:100%;
+  overflow-y:auto;overflow-x:hidden;
+  border-right:2px solid var(--brd);
+  background:var(--bg2);
+  transition:border-color .3s,background .3s;
+  padding-bottom:40px;
+}
+.detail-col{
+  flex:1;min-width:0;
+  height:100%;
+  overflow-y:auto;
+  background:var(--bg2);
+  padding-bottom:40px;
+  transition:background .3s;
+}
+
+/* ── PATH COLUMN ──────────────────────────────────────────── */
+.path-header{
+  padding:16px 16px 16px;
+  position:sticky;top:0;z-index:5;
+  background:var(--bg2);
+  border-bottom:2px solid var(--brd);
+  transition:background .3s,border-color .3s;
+}
+.path-header-title{
+  font-size:11px;font-weight:900;color:var(--txt3);
+  letter-spacing:1.4px;text-transform:uppercase;
+}
+
+/* phase section */
+.phase-section{margin-bottom:4px}
+.phase-banner{
+  margin:12px 12px 0;
+  background:var(--txt);border-radius:14px;padding:12px 16px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 3px 0 rgba(0,0,0,.35);
+}
+[data-theme="dark"] .phase-banner{background:#0f3460;box-shadow:0 3px 0 #060b1a}
+.pb-icon{font-size:22px;flex-shrink:0}
+.pb-body{flex:1;min-width:0}
+.pb-title{font-size:13px;font-weight:900;color:#fff;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pb-sub{font-size:10px;color:rgba(255,255,255,.5);font-weight:700}
+.pb-xp{border-radius:100px;border:2px solid;padding:3px 8px;font-size:10px;font-weight:900;color:#fff;white-space:nowrap;box-shadow:0 2px 0;flex-shrink:0}
+
+/* week nodes in path column */
+.week-nodes{padding:8px 12px 6px;display:flex;flex-direction:column;gap:7px}
+.wnode{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-radius:14px;
+  background:var(--bg);border:2px solid var(--brd);
+  box-shadow:0 2px 0 var(--card-sh-c);
+  cursor:pointer;
+  transition:transform .12s var(--sp),box-shadow .12s,border-color .12s,background .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.wnode:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--card-sh-c);border-color:var(--b)}
+.wnode:active{transform:translateY(1px);box-shadow:0 1px 0 var(--card-sh-c)}
+/* Selected = the open one in detail panel */
+.wnode.selected{border-color:var(--g);background:var(--gll);box-shadow:0 3px 0 var(--gd)}
+[data-theme="dark"] .wnode.selected{background:#0d2010;border-color:var(--g)}
+/* Locked */
+.wnode.locked{opacity:.45;pointer-events:none;cursor:not-allowed}
+/* Circle icon inside node */
+.wnode-circle{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;border:2px solid var(--brd2);
+  background:var(--bg2);
+  transition:all .2s;position:relative;
+}
+/* Unlocked (active) circle */
+.wnode:not(.locked):not(.done) .wnode-circle{
+  background:var(--g);border-color:var(--gd);
+  box-shadow:0 0 0 3px rgba(88,204,2,.12);
+}
+/* Done circle — green check */
+.wnode.done .wnode-circle{
+  background:var(--gl);border-color:var(--gd);
+  font-size:16px;font-weight:900;color:var(--gd);
+}
+/* Boss circle */
+.wnode.boss:not(.locked) .wnode-circle{
+  background:var(--r);border-color:var(--rd);
+  box-shadow:0 0 0 3px rgba(255,75,75,.15);
+}
+/* Pulse ring on selected active */
+.wnode.selected:not(.done):not(.locked) .wnode-circle::before{
+  content:'';position:absolute;inset:-7px;border-radius:50%;
+  border:2px solid var(--g);opacity:0;
+  animation:pulse-ring 2s ease-in-out infinite;
+}
+.wnode.selected.boss .wnode-circle::before{
+  border-color:var(--r);animation:pulse-ring 1.5s ease-in-out infinite;
+}
+.wnode-info{flex:1;min-width:0}
+.wnode-title{font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.wnode.selected .wnode-title{color:var(--gd)}
+[data-theme="dark"] .wnode.selected .wnode-title{color:var(--g)}
+.wnode.done .wnode-title{color:var(--txt2)}
+.wnode-meta{font-size:11px;font-weight:700;color:var(--txt3)}
+/* progress bar inside node */
+.wnode-prog{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:6px}
+.wnode-prog-fill{height:100%;border-radius:2px;transition:width .5s var(--sp)}
+.wnode-xp{font-size:10px;font-weight:900;color:var(--yd);background:var(--yl);padding:2px 7px;border-radius:100px;border:1.5px solid var(--yd);white-space:nowrap;flex-shrink:0;align-self:center}
+[data-theme="dark"] .wnode-xp{background:#1a1200}
+
+/* ── DETAIL PANEL ─────────────────────────────────────────── */
+.detail-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100%;text-align:center;padding:40px;
+}
+.detail-empty-ico{font-size:64px;margin-bottom:20px;animation:owlbob 3s ease-in-out infinite}
+.detail-empty-title{font-size:22px;font-weight:900;color:var(--txt);margin-bottom:8px}
+.detail-empty-sub{font-size:14px;color:var(--txt2);font-weight:600;line-height:1.6;max-width:300px}
+
+/* detail phase header */
+.detail-header{
+  background:var(--bg);border-bottom:2px solid var(--brd);
+  padding:20px 24px 0;
+  position:sticky;top:0;z-index:5;
+  transition:background .3s,border-color .3s;
+}
+.dh-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px}
+.dh-icon{
+  width:60px;height:60px;border-radius:16px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.dh-body{flex:1;min-width:0}
+.dh-phase{font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;opacity:.8}
+.dh-title{font-size:20px;font-weight:900;color:var(--txt);margin-bottom:4px;letter-spacing:-.2px}
+.dh-desc{font-size:13px;color:var(--txt2);font-weight:600;line-height:1.5}
+.dh-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:0}
+.dh-chip{
+  font-size:11px;font-weight:900;padding:4px 10px;border-radius:100px;
+  border:2px solid;display:flex;align-items:center;gap:4px;
+}
+/* progress row */
+.dh-prog{display:flex;align-items:center;gap:10px;padding:12px 0 14px}
+.dh-prog-bar{flex:1;height:10px;background:var(--bg3);border-radius:100px;border:2px solid var(--brd);overflow:hidden}
+.dh-prog-fill{height:100%;border-radius:100px;transition:width .6s var(--sp)}
+.dh-prog-pct{font-size:12px;font-weight:900;white-space:nowrap}
+/* week tabs */
+.dh-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:0}
+.dh-tabs::-webkit-scrollbar{display:none}
+.dh-tab{
+  padding:10px 16px;border-radius:12px 12px 0 0;
+  font-size:13px;font-weight:800;color:var(--txt2);
+  white-space:nowrap;flex-shrink:0;border:none;background:transparent;
+  border-bottom:3px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.dh-tab:hover{color:var(--txt);background:var(--bg2)}
+.dh-tab.active{color:var(--gd);border-bottom-color:var(--g)}
+[data-theme="dark"] .dh-tab.active{color:var(--g)}
+
+/* detail tasks area */
+.detail-body{padding:20px 24px}
+.week-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.week-title-txt{font-size:16px;font-weight:900;color:var(--txt);letter-spacing:-.1px}
+.week-done-badge{
+  font-size:11px;font-weight:900;padding:4px 10px;border-radius:100px;
+  background:var(--gl);color:var(--gd);border:1.5px solid var(--gd);
+}
+[data-theme="dark"] .week-done-badge{background:#0d2010}
+
+/* task card */
+.task{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 16px;border-radius:16px;cursor:pointer;
+  background:var(--bg);border:2px solid var(--brd);
+  box-shadow:var(--card-sh) var(--card-sh-c);
+  margin-bottom:8px;
+  transition:transform .12s var(--sp),box-shadow .12s,border-color .12s,background .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.task:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--card-sh-c);border-color:var(--b)}
+.task:active{transform:translateY(1px);box-shadow:0 1px 0 var(--card-sh-c)}
+.task.done{background:var(--gll);border-color:#9dde5f;box-shadow:0 3px 0 #9dde5f}
+[data-theme="dark"] .task.done{background:#0d2010;border-color:#3a7a3a;box-shadow:0 3px 0 #2a5a2a}
+.task.done:hover{border-color:var(--gd);box-shadow:0 5px 0 var(--gd)}
+.task.proj:not(.done){border-color:var(--yd);background:var(--yl);box-shadow:0 3px 0 var(--yd)}
+[data-theme="dark"] .task.proj:not(.done){background:#1a1400;border-color:var(--yd)}
+.task-cb{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  border:3px solid var(--brd2);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .22s var(--sp);margin-top:1px;
+}
+.task.done .task-cb{background:var(--g);border-color:var(--gd);box-shadow:0 0 0 4px rgba(88,204,2,.12);animation:cbpop .35s var(--sp)}
+.task-chk{display:none}
+.task.done .task-chk{display:block}
+.task-body{flex:1;min-width:0}
+/* BUG FIX: rely only on CSS class, never set inline style */
+.task-name{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:3px;line-height:1.4}
+.task.done .task-name{text-decoration:line-through;color:var(--txt3)}
+.task-desc{font-size:12px;font-weight:600;color:var(--txt2);line-height:1.5}
+.task-xp{display:inline-block;margin-top:6px;font-size:11px;font-weight:900;color:var(--bd);background:var(--bl);padding:2px 9px;border-radius:100px;border:1.5px solid var(--bd)}
+[data-theme="dark"] .task-xp{background:#001a2e}
+
+/* boss card in detail */
+.boss-card{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 20px;margin-top:8px;
+  background:var(--r);border:3px solid var(--rd);
+  border-radius:16px;cursor:pointer;
+  box-shadow:0 5px 0 var(--rd),0 7px 20px rgba(255,75,75,.28);
+  transition:transform .15s,box-shadow .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.boss-card:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--rd),0 10px 28px rgba(255,75,75,.38)}
+.boss-card:active{transform:translateY(1px);box-shadow:0 3px 0 var(--rd)}
+.boss-ico{font-size:28px;flex-shrink:0;animation:wobble 2.5s ease-in-out infinite}
+.boss-txt{flex:1}
+.boss-title{font-size:16px;font-weight:900;color:#fff}
+.boss-sub{font-size:12px;color:rgba(255,255,255,.7);font-weight:700;margin-top:2px}
+.boss-arr{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:900;flex-shrink:0;transition:transform .15s var(--sp)}
+.boss-card:hover .boss-arr{transform:translateX(3px)}
+
+/* ── OTHER VIEWS ─────────────────────────────────────────── */
+.view-inner{
+  padding:28px 32px 48px;
+  overflow-y:auto;
+  width:100%;
+  height:100%;
+}
+.view-inner::-webkit-scrollbar{width:5px}
+
+/* page heading */
+.view-heading{font-size:24px;font-weight:900;color:var(--txt);margin-bottom:6px;letter-spacing:-.3px}
+.view-sub{font-size:14px;color:var(--txt2);font-weight:600;margin-bottom:28px}
+
+/* skills */
+.tier-block{margin-bottom:32px}
+.tier-lbl{font-size:11px;font-weight:900;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;padding-bottom:10px;border-bottom:2px solid var(--brd);margin-bottom:14px}
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.sk-card{
+  background:var(--bg);border:3px solid var(--brd);border-radius:16px;
+  padding:18px 16px;box-shadow:var(--card-sh) var(--card-sh-c);
+  transition:transform .12s var(--sp),box-shadow .12s;
+}
+.sk-card.ok{border-color:var(--yd);background:var(--yl);box-shadow:0 4px 0 var(--yd)}
+[data-theme="dark"] .sk-card.ok{background:#1a1200}
+.sk-card.ok:hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--yd)}
+.sk-card.no{opacity:.35;filter:grayscale(1)}
+.sk-ico{font-size:28px;margin-bottom:9px;line-height:1;display:block}
+.sk-nm{font-size:13px;font-weight:800;color:var(--txt);margin-bottom:3px}
+.sk-st{font-size:11px;font-weight:800}
+.sk-card.ok .sk-st{color:var(--gd)} .sk-card.no .sk-st{color:var(--txt3)}
+
+/* trophies */
+.trophy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.t-card{
+  background:var(--bg);border:3px solid var(--brd);border-radius:18px;
+  padding:22px 18px;text-align:center;
+  box-shadow:var(--card-sh) var(--card-sh-c);
+  transition:transform .12s var(--sp),box-shadow .12s;
+}
+.t-card.ok{border-color:var(--yd);background:var(--yl);box-shadow:0 4px 0 var(--yd)}
+[data-theme="dark"] .t-card.ok{background:#1a1200}
+.t-card.ok:hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--yd)}
+.t-card.no{opacity:.3;filter:grayscale(1)}
+.t-ico{font-size:40px;display:block;margin-bottom:10px;line-height:1}
+.t-nm{font-size:13px;font-weight:900;color:var(--txt);margin-bottom:5px}
+.t-desc{font-size:11px;font-weight:600;color:var(--txt2);line-height:1.5}
+.t-done{font-size:11px;font-weight:900;color:var(--gd);margin-top:8px}
+
+/* stats */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:var(--bg);border:3px solid var(--brd);border-radius:18px;padding:22px;text-align:center;box-shadow:var(--card-sh) var(--card-sh-c);transition:transform .12s}
+.stat-card:hover{transform:translateY(-2px)}
+.stat-n{font-size:34px;font-weight:900;margin-bottom:4px;line-height:1.1}
+.stat-l{font-size:11px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px}
+.prog-card{background:var(--bg);border:3px solid var(--brd);border-radius:18px;padding:24px;box-shadow:var(--card-sh) var(--card-sh-c)}
+.prog-title{font-size:16px;font-weight:900;color:var(--txt);margin-bottom:18px}
+.prog-row{margin-bottom:16px}
+.prog-row:last-child{margin-bottom:0}
+.prog-row-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;margin-bottom:7px}
+.prog-bg{height:12px;background:var(--bg3);border-radius:100px;border:2px solid var(--brd);overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;transition:width .6s var(--sp)}
+
+/* overall progress card at top of learn detail */
+.overall-card{
+  background:linear-gradient(135deg,var(--g) 0%,#35a800 100%);
+  border-radius:16px;padding:14px 18px;margin-bottom:0;
+  display:flex;align-items:center;gap:16px;
+  box-shadow:0 5px 0 var(--gd),0 8px 24px rgba(88,204,2,.2);
+  position:relative;overflow:hidden;
+}
+.overall-card::after{content:'';position:absolute;right:-24px;top:-24px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.07)}
+.oc-owl{font-size:32px;flex-shrink:0;animation:owlbob 3s ease-in-out infinite;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));z-index:1}
+.oc-body{flex:1;min-width:0;z-index:1}
+.oc-title{font-size:15px;font-weight:900;color:#fff;margin-bottom:3px;letter-spacing:-.2px}
+.oc-sub{font-size:11px;color:rgba(255,255,255,.8);font-weight:700;line-height:1.4}
+.oc-badge{background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.35);border-radius:100px;padding:5px 12px;font-size:14px;font-weight:900;color:#fff;flex-shrink:0;z-index:1;text-align:center}
+.oc-badge small{display:block;font-size:10px;opacity:.8;letter-spacing:.3px;text-transform:uppercase}
+/* phase chips below overall card */
+.phase-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.ph-chip{font-size:12px;font-weight:800;padding:5px 12px;border-radius:100px;border:2px solid;display:flex;align-items:center;gap:4px;cursor:pointer;transition:transform .12s}
+.ph-chip:hover{transform:scale(1.06)}
+.ph-chip:active{transform:scale(.95)}
+
+/* ── BOSS MODAL ──────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .22s;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg);border-radius:24px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.3);transform:scale(.93) translateY(20px);transition:transform .28s var(--sp),background .3s;overscroll-behavior:contain}
+.overlay.open .modal{transform:none}
+.modal-hdr{padding:24px 24px 0}
+.modal-title{font-size:20px;font-weight:900;color:var(--txt);margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--txt2);font-weight:600}
+.hp-wrap{margin:14px 0 4px}
+.hp-lbl{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--txt2)}
+.hp-bar{height:12px;background:var(--bg3);border-radius:100px;border:2px solid var(--brd);overflow:hidden}
+.hp-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--r),#ff8080);transition:width .4s var(--ease)}
+.modal-body{padding:18px 24px}
+.q-card{background:var(--bg2);border:2px solid var(--brd);border-radius:16px;padding:20px;margin-bottom:14px}
+.q-num{font-size:11px;font-weight:900;color:var(--b);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.q-text{font-size:17px;font-weight:700;color:var(--txt);line-height:1.55}
+.q-opts{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.q-opt{padding:14px 18px;background:var(--bg);border:3px solid var(--brd);border-radius:14px;cursor:pointer;text-align:left;font-family:var(--font);font-size:14px;font-weight:700;color:var(--txt);box-shadow:0 4px 0 var(--card-sh-c);transition:transform .12s var(--sp),box-shadow .12s,border-color .12s,background .12s;-webkit-tap-highlight-color:transparent;line-height:1.4}
+.q-opt:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 var(--card-sh-c);border-color:var(--b)}
+.q-opt:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 var(--card-sh-c)}
+.q-opt.correct{border-color:var(--gd);background:var(--gll);box-shadow:0 4px 0 var(--gd);color:var(--gd)}
+.q-opt.wrong{border-color:var(--rd);background:var(--rl);box-shadow:0 4px 0 var(--rd);color:var(--rd)}
+[data-theme="dark"] .q-opt.correct{background:#0d2010} [data-theme="dark"] .q-opt.wrong{background:#2a0808}
+.q-opt:disabled{cursor:not-allowed}
+.q-fb{padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6;display:none;margin-top:10px;font-weight:600}
+.q-fb.show{display:block;animation:fadeUp .2s var(--ease) both}
+.q-fb.ok{background:var(--gll);color:var(--gd);border-left:3px solid var(--g)}
+.q-fb.bad{background:var(--rl);color:var(--rd);border-left:3px solid var(--r)}
+[data-theme="dark"] .q-fb.ok{background:#0d2010} [data-theme="dark"] .q-fb.bad{background:#2a0808}
+.q-next{width:100%;padding:14px;background:var(--b);color:#fff;border:none;border-radius:12px;cursor:pointer;font-family:var(--font);font-size:15px;font-weight:900;transition:background .15s,transform .12s;display:none;margin-top:12px;box-shadow:0 4px 0 var(--bd)}
+.q-next.show{display:block;animation:fadeUp .2s var(--ease) both}
+.q-next:hover{background:var(--bd);transform:translateY(-1px)}
+.q-next:active{transform:translateY(2px)}
+.modal-foot{padding:0 24px 22px}
+.btn-ghost{width:100%;padding:13px;background:transparent;border:2px solid var(--brd);border-radius:14px;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:800;color:var(--txt2);box-shadow:0 3px 0 var(--brd2);transition:background .15s,transform .12s}
+.btn-ghost:hover{background:var(--bg2)}
+.btn-ghost:active{transform:translateY(1px)}
+.boss-result{text-align:center;padding:20px 0 8px}
+.boss-trophy{display:block;font-size:70px;line-height:1;margin-bottom:14px;animation:trophypop .6s var(--sp) both}
+.boss-r-title{font-size:24px;font-weight:900;color:var(--txt);margin-bottom:8px}
+.boss-r-desc{font-size:14px;color:var(--txt2);font-weight:600;line-height:1.65;margin-bottom:16px}
+.boss-r-pill{display:inline-flex;align-items:center;gap:8px;background:var(--gll);border:2px solid var(--gd);color:var(--gd);border-radius:100px;padding:10px 24px;font-size:16px;font-weight:900;box-shadow:0 3px 0 var(--gd)}
+[data-theme="dark"] .boss-r-pill{background:#0d2010}
+.btn-next{width:calc(100% - 48px);margin:14px 24px 0;display:block;padding:15px;border-radius:14px;border:none;background:var(--g);color:#fff;font-family:var(--font);font-size:16px;font-weight:900;box-shadow:0 4px 0 var(--gd);transition:transform .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--gd)}
+.btn-next:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gd)}
+
+/* ── STREAK MODAL ─────────────────────────────────────────── */
+.s-days{display:flex;gap:8px;justify-content:center;margin:18px 0 14px}
+.sday{width:42px;height:42px;border-radius:50%;border:3px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--txt3);transition:all .3s var(--sp)}
+.sday.lit{background:var(--o);border-color:var(--od);color:#fff;box-shadow:0 3px 0 var(--od)}
+.sday.nxt{border-color:var(--b);color:var(--b);box-shadow:0 0 0 3px var(--bl)}
+.btn-green{display:block;width:100%;padding:15px;border-radius:14px;border:none;background:var(--g);color:#fff;font-family:var(--font);font-size:16px;font-weight:900;box-shadow:0 4px 0 var(--gd);transition:transform .12s,box-shadow .12s;margin-top:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--gd)}
+.btn-green:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gd)}
+.btn-green:disabled{background:var(--bg3);color:var(--txt3);box-shadow:0 4px 0 var(--brd2);cursor:not-allowed;transform:none}
+
+/* ── TOASTS ──────────────────────────────────────────────── */
+#toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:400;display:flex;flex-direction:column-reverse;gap:8px;align-items:center;pointer-events:none;min-width:320px}
+.toast{padding:12px 18px;border-radius:14px;font-size:14px;font-weight:800;font-family:var(--font);box-shadow:0 4px 20px rgba(0,0,0,.18);display:flex;align-items:center;gap:10px;border:3px solid;max-width:400px;width:100%;animation:toastIn .4s var(--sp) both;transition:background .3s}
+.toast.hiding{animation:toastOut .25s var(--ease) both}
+.t-i{font-size:19px;flex-shrink:0}
+.toast.xp{background:var(--bl);color:var(--bd);border-color:var(--bd)}
+.toast.ach{background:var(--yl);color:var(--yd);border-color:var(--yd)}
+.toast.lvl{background:var(--gl);color:var(--gd);border-color:var(--gd)}
+[data-theme="dark"] .toast.xp{background:#001a2e} [data-theme="dark"] .toast.ach{background:#1a1200} [data-theme="dark"] .toast.lvl{background:#0a1a00}
+
+/* ── CONFETTI ─────────────────────────────────────────────── */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:500}
+
+/* ── KEYFRAMES ────────────────────────────────────────────── */
+@keyframes owlbob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(3deg)}}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.35}60%{transform:scale(1.2);opacity:.1}100%{transform:scale(1.2);opacity:0}}
+@keyframes cbpop{0%{transform:scale(.5)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes trophypop{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+@keyframes lvlpop{0%{transform:scale(1)}40%{transform:scale(1.4)}70%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(10px) scale(.95)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="t-logo">
+    <div class="t-logo-ico">🦉</div>
+    <div class="t-logo-txt"><b>ML</b>Quest</div>
+  </div>
+  <div class="t-divider"></div>
+  <div class="t-xp">
+    <div class="t-badge" id="t-badge">1</div>
+    <div class="t-xp-col">
+      <div class="t-xp-name" id="t-xp-name">Apprentice Coder</div>
+      <div class="t-xp-bar"><div class="t-xp-fill" id="t-xp-fill" style="width:0%"></div></div>
+    </div>
+    <div class="t-xp-lbl" id="t-xp-lbl">0 / 500 XP</div>
+  </div>
+  <div class="t-gap"></div>
+  <button class="t-stat fire" onclick="openStreak()" aria-label="Streak">🔥 <span id="t-streak">0</span></button>
+  <button class="t-stat gem"  aria-label="Gems">💎 <span id="t-gems">0</span></button>
+  <button class="t-stat xp"   aria-label="XP">⚡ <span id="t-xp">0</span></button>
+  <button class="t-dm" id="dm-btn" onclick="toggleDark()" aria-label="Toggle dark mode">🌙</button>
+</div>
+
+<!-- BODY -->
+<div id="body">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <nav class="sb-nav">
+      <button class="sb-btn active" id="sb-learn"    onclick="navTo('learn',this)">    <span class="sb-ico">🗺️</span>Learn     <div class="sb-dot"></div></button>
+      <button class="sb-btn"        id="sb-skills"   onclick="navTo('skills',this)">   <span class="sb-ico">✨</span>Skills    <div class="sb-dot"></div></button>
+      <button class="sb-btn"        id="sb-trophies" onclick="navTo('trophies',this)"> <span class="sb-ico">🏆</span>Trophies  <div class="sb-dot"></div></button>
+      <button class="sb-btn"        id="sb-stats"    onclick="navTo('stats',this)">    <span class="sb-ico">📊</span>Stats     <div class="sb-dot"></div></button>
+    </nav>
+    <div class="sb-phases">
+      <div class="sb-phases-title">Phase Progress</div>
+      <div id="sb-phase-list"></div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-streak-card" onclick="openStreak()">
+        <div class="sb-streak-ico">🔥</div>
+        <div>
+          <div class="sb-streak-val" id="sb-streak-val">0</div>
+          <div class="sb-streak-lbl">Day Streak</div>
+        </div>
+      </div>
+      <button style="margin-top:8px;display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border-radius:12px;background:var(--bg2);border:1.5px solid var(--brd);font-family:var(--font);font-size:13px;font-weight:800;color:var(--txt2);cursor:pointer;transition:background .15s" onclick="toggleDark()" id="sb-dm">🌙 Dark mode</button>
+      <button style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border-radius:12px;background:var(--bg2);border:1.5px solid var(--brd);font-family:var(--font);font-size:13px;font-weight:800;color:var(--txt2);cursor:pointer;transition:background .15s" onclick="toggleSound()" id="sfx-btn">🔊 Sound effects</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- LEARN VIEW -->
+    <div class="view active" id="v-learn">
+      <!-- LEFT: path column -->
+      <div class="path-col" id="path-col">
+        <div class="path-header" id="path-header">
+          <div class="path-header-title">Learning Path</div>
+        </div>
+        <div id="path-list"></div>
+      </div>
+      <!-- RIGHT: detail panel -->
+      <div class="detail-col" id="detail-col">
+        <div class="detail-empty" id="detail-empty">
+          <div class="detail-empty-ico">🦉</div>
+          <div class="detail-empty-title">Choose a lesson</div>
+          <div class="detail-empty-sub">Click any week on the path to see your tasks and start learning.</div>
+        </div>
+        <div id="detail-panel" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- SKILLS VIEW -->
+    <div class="view" id="v-skills">
+      <div class="view-inner">
+        <div class="view-heading">Skills</div>
+        <div class="view-sub">Unlock skills by completing phases</div>
+        <div id="skills-body"></div>
+      </div>
+    </div>
+
+    <!-- TROPHIES VIEW -->
+    <div class="view" id="v-trophies">
+      <div class="view-inner">
+        <div class="view-heading">Trophies</div>
+        <div class="view-sub">Earn achievements by hitting milestones</div>
+        <div class="trophy-grid" id="trophy-grid"></div>
+      </div>
+    </div>
+
+    <!-- STATS VIEW -->
+    <div class="view" id="v-stats">
+      <div class="view-inner">
+        <div class="view-heading">Stats</div>
+        <div class="view-sub">Your learning journey at a glance</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-n" style="color:var(--g)"  id="s-ta">0</div><div class="stat-l">Tasks Done</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--r)"  id="s-bo">0</div><div class="stat-l">Bosses Slain</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--o)"  id="s-sk">0</div><div class="stat-l">Best Streak</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--b)"  id="s-ph">0</div><div class="stat-l">Phases Done</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--p)"  id="s-ac">0%</div><div class="stat-l">Quiz Accuracy</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--g)"  id="s-lv">1</div><div class="stat-l">Level</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--y)"  id="s-gm">0</div><div class="stat-l">Gems</div></div>
+          <div class="stat-card"><div class="stat-n" style="color:var(--b)"  id="s-xp">0</div><div class="stat-l">Total XP</div></div>
+        </div>
+        <div class="prog-card">
+          <div class="prog-title">Phase Progress</div>
+          <div id="prog-bars"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /body -->
+
+<!-- BOSS MODAL -->
+<div class="overlay" id="boss-overlay">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="boss-modal-title">⚔️ Boss Battle</div>
+      <div class="modal-sub"   id="boss-sub">Prove your knowledge!</div>
+      <div class="hp-wrap">
+        <div class="hp-lbl"><span>Boss HP</span><span id="hp-pct">100%</span></div>
+        <div class="hp-bar"><div class="hp-fill" id="hp-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="modal-body" id="boss-body"></div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeBoss()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- STREAK MODAL -->
+<div class="overlay" id="streak-overlay">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hdr">
+      <div class="modal-title">🔥 Daily Login</div>
+      <div class="modal-sub" id="str-sub">Keep your streak alive!</div>
+    </div>
+    <div class="modal-body">
+      <div class="s-days" id="s-days"></div>
+      <p style="font-size:13px;font-weight:600;color:var(--txt2);text-align:center;margin-bottom:16px;line-height:1.6">Log in every day. Miss a day and your streak resets!</p>
+      <button class="btn-green" id="claim-btn" onclick="claimDaily()">Claim reward (+100 XP)</button>
+      <button class="btn-ghost" style="margin-top:8px" onclick="closeOverlay('streak-overlay')">Not now</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script>
+'use strict';
+
+/* ══ DATA ══════════════════════════════════════════════════════════════ */
+// All PHASES, LEVELS, ACHIEVEMENTS, SKILLS, BOSS_Q data
+const PHASE_COLORS = ['#58cc02','#1cb0f6','#ff9600','#ce82ff','#ff4b4b','#46a302','#ffc800'];
+const PHASE_DARK   = ['#46a302','#0d8fc3','#db7300','#9b00e8','#d93636','#2d8002','#e6a700'];
+
+const PHASES=[{id:0,icon:'🐍',title:'Python Fluency',sub:'Phase 0 · 4 Weeks',desc:'Master Python — your primary weapon. Build real programs, automate tasks, and push to GitHub daily.',xpReward:500,gemReward:5,weeks:[{title:'Week 1-2: Core Python',xp:200,tasks:[{n:'Automate the Boring Stuff Ch. 1-4',d:'Variables, flow control, functions, lists. Do every exercise.',xp:30},{n:'Ch. 5-6: Dicts & Strings — Password Generator',d:'Build a secure password generator with character type options.',xp:30},{n:'Ch. 8-9: File I/O — File Organizer',d:'Automatically sort your Downloads folder by file type and date.',xp:40},{n:'Ch. 10-11: Debugging & Web Scraping',d:'Build a web scraper for data you genuinely care about.',xp:40},{n:'Push everything to GitHub with proper READMEs',d:'Create ai-ml-journey repo. Commit daily — your engineering journal.',xp:20}]},{title:'Week 3: Intermediate Python + Git',xp:150,tasks:[{n:'Exercism: 30-40 Python exercises',d:'List comprehensions, generators, decorators, OOP, error handling.',xp:40},{n:'🏆 Build: Bank Account System (OOP)',d:'Account, SavingsAccount, Transaction classes with proper inheritance.',xp:40},{n:'Decorators, generators, context managers',d:'Build a timing decorator and a file reader generator.',xp:30},{n:'Git: branches, PRs, .gitignore, virtual environments',d:'Master the professional Git workflow used at every tech company.',xp:20},{n:'Project Euler: 20 problems',d:'Mathematical programming puzzles to build algorithmic thinking.',xp:20}]},{title:'Week 4: Projects',xp:200,tasks:[{n:'🏆 Expense Tracker CLI',d:'Add/view/delete, categories, CSV saving, monthly reports with charts.',xp:70},{n:'🏆 API-Powered Dashboard',d:'Fetch live data, format, cache results, handle errors gracefully.',xp:70},{n:'🏆 Data Format Converter',d:'CSV ↔ JSON ↔ Excel. Handle missing values, encodings, large files.',xp:60}]}]},{id:1,icon:'📐',title:'Math + Data + SQL',sub:'Phase 1 · 3-4 Weeks',desc:'Mathematics is the language of intelligence. Build real intuition through visual learning and code.',xpReward:600,gemReward:6,weeks:[{title:'Week 5-6: Math (Visual + Code)',xp:250,tasks:[{n:'3Blue1Brown: Essence of Linear Algebra (all 16 videos)',d:'After each video, implement in NumPy: vectors, dot products, eigenvalues.',xp:60},{n:'3Blue1Brown: Essence of Calculus (Ch. 1-7)',d:'Watch, then implement gradient descent from scratch in Python.',xp:50},{n:'StatQuest: Statistics Fundamentals Playlist',d:'Distributions, p-values, confidence intervals, Bayes theorem.',xp:50},{n:'🏆 "Math From Scratch" Library',d:'Vector, Matrix, Statistics, GradientDescent classes — all verified against NumPy.',xp:90}]},{title:'Week 7: Data Wrangling',xp:200,tasks:[{n:'NumPy Beginners Guide (complete)',d:'Arrays, indexing, broadcasting, vectorized operations.',xp:40},{n:'Kaggle Learn: Pandas (all exercises)',d:'Missing values, merges, groupby, rolling windows, aggregation.',xp:50},{n:'Kaggle Learn: Data Visualization (all exercises)',d:'Seaborn + Matplotlib mastery on real datasets.',xp:50},{n:'🏆 Full EDA on a Real Kaggle Dataset',d:'20+ visualizations, correlation analysis, statistical tests.',xp:70}]},{title:'Week 8: SQL',xp:180,tasks:[{n:'SQLBolt: All 19 interactive lessons',d:'SELECT, filtering, JOINs, aggregation, subqueries.',xp:50},{n:'Kaggle: Intro + Advanced SQL',d:'CTEs, window functions, optimization on BigQuery with real datasets.',xp:50},{n:'🏆 Data Pipeline Project',d:'API → clean → SQLite → SQL queries → automated report with charts.',xp:80}]}]},{id:2,icon:'🧠',title:'Classical ML',sub:'Phase 2 · 4-5 Weeks',desc:'The bedrock of all intelligence systems. Most ML interviews test you here.',xpReward:800,gemReward:8,weeks:[{title:'Week 9-10: Core Algorithms',xp:300,tasks:[{n:'Kaggle: Intro + Intermediate ML + Feature Engineering',d:'All 3 micro-courses (~12 hrs). Hands-on from the very first lesson.',xp:60},{n:'StatQuest: Full ML Playlist',d:'LinReg, LogReg, Decision Trees, RF, XGBoost, Bias-Variance, ROC/AUC.',xp:60},{n:'Implement Linear & Logistic Regression from scratch',d:'NumPy only. Gradient descent, cross-entropy. Verify vs sklearn.',xp:60},{n:'Implement KNN + Decision Tree from scratch',d:'Distance metrics, Gini impurity, max_depth. Visualize decision boundary.',xp:60},{n:'Random Forest + XGBoost on a Kaggle dataset',d:'Feature importance, hyperparameter tuning, cross-validation.',xp:60}]},{title:'Week 11: ML From Scratch Library',xp:300,tasks:[{n:'🏆 "ML From Scratch" Library (6 algorithms)',d:'LinearReg, LogisticReg, KNN, DecisionTree, KMeans, PCA — all tested vs sklearn.',xp:120},{n:'Unit tests: all outputs match sklearn within 1%',d:'Professional test suite. Clean documentation.',xp:80},{n:'Unsupervised: KMeans + PCA + DBSCAN',d:'Elbow method, explained variance ratio, density-based clustering.',xp:80},{n:'Feature engineering + imbalanced data (SMOTE)',d:'Class weights, over/undersampling. Handle the Credit Card fraud dataset.',xp:70}]},{title:'Week 12-13: End-to-End Projects',xp:350,tasks:[{n:'🏆 Predict-Your-Own-Problem (deployed)',d:'Your interesting problem. Full pipeline + FastAPI endpoint + deployed on Render.',xp:120},{n:'🏆 Kaggle Competition — Top 25%',d:'Tabular Playground or House Prices. Document everything. 5+ submissions.',xp:120},{n:'🏆 Fraud Detection + Streamlit Dashboard',d:'Extreme class imbalance, proper metrics, live monitoring dashboard.',xp:110}]}]},{id:3,icon:'⚡',title:'Deep Learning',sub:'Phase 3 · 5 Weeks',desc:'From a single neuron to transformers. Build neural networks completely from scratch.',xpReward:1000,gemReward:10,weeks:[{title:'Week 14: From Scratch with Karpathy',xp:300,tasks:[{n:"Karpathy: 'Building Micrograd' — CODE ALONG",d:'Complete autograd engine + neural network from absolute scratch.',xp:80},{n:"Karpathy: 'Building Makemore' Parts 1-2 — CODE ALONG",d:'Bigram + MLP character-level language models from scratch.',xp:70},{n:'🏆 Extended Micrograd',d:'Add tanh/sigmoid/dropout, Adam optimizer, train on real data.',xp:100},{n:"Read: 'A Recipe for Training Neural Networks' (Karpathy)",d:'The best debugging guide ever written. Bookmark it.',xp:30},{n:'PyTorch: 60-Minute Blitz',d:'Tensors, autograd, building neural networks the professional way.',xp:20}]},{title:'Week 15-17: fast.ai — Practical Deep Learning',xp:400,tasks:[{n:'fast.ai Lessons 1-3: Image Classification',d:'Deploy an image classifier to HuggingFace Spaces. Pick something fun!',xp:100},{n:'fast.ai Lessons 4-5: NLP + Tabular',d:'Sentiment analyzer on real reviews. Movie recommendation engine.',xp:100},{n:'fast.ai Lessons 6-7: Random Forest Deep Dive',d:'Kaggle image competition using transfer learning + fine-tuning.',xp:100},{n:'🏆 Image Classifier Deployed with Public URL',d:'README with live demo link. Something real people can actually use.',xp:100}]},{title:'Week 18: Transformers + Advanced',xp:400,tasks:[{n:"Karpathy: 'Let's Build GPT' — CODE ALONG (2 hours)",d:'Self-attention, multi-head attention, feed-forward, positional encoding.',xp:100},{n:'🏆 GPT Trained on Custom Data',d:'Your corpus: code, lyrics, recipes. Multiple experiments documented.',xp:120},{n:'🏆 Real-Time Object Detection (YOLOv8)',d:'Fine-tune on custom objects. Webcam demo with live bounding boxes.',xp:100},{n:'🏆 Time Series Forecasting Dashboard',d:'Classical ML vs LSTM/Transformer. Deployed live.',xp:80}]}]},{id:4,icon:'🤖',title:'LLMs & GenAI',sub:'Phase 4 · 5-6 Weeks',desc:'Where the $200K–$500K+ jobs live. RAG, fine-tuning, agents — the cutting edge.',xpReward:1200,gemReward:15,weeks:[{title:'Week 19-20: LLM Foundations + RAG',xp:400,tasks:[{n:'HuggingFace NLP Course Chapters 1-4',d:'Tokenizers → transformers → fine-tuning → sharing models.',xp:80},{n:'Master: Pre-train vs Fine-tune vs RAG — when to use each',d:'Prompt engineering: zero-shot, few-shot, chain-of-thought.',xp:60},{n:'🏆 Production RAG System (deployed)',d:'PDF/web ingest → chunk → embed → ChromaDB → Ollama → citations → Gradio.',xp:150},{n:'Upgrade: memory + reranking + hybrid search',d:'Conversation memory, BM25 + semantic hybrid, cross-encoder reranking.',xp:80},{n:'Build RAG evaluation: faithfulness + relevance',d:'Automated eval. Measure retrieval accuracy on custom eval set.',xp:30}]},{title:'Week 21-22: Fine-Tuning + Quantization',xp:450,tasks:[{n:'Study: LoRA + QLoRA + PEFT in depth',d:'Fine-tune billion-param models on free Colab T4. Know the math.',xp:70},{n:'Study: RLHF + DPO — implement DPO from scratch',d:'How ChatGPT and Claude are trained. Reward models, PPO, DPO.',xp:70},{n:'🏆 Fine-Tune a Domain Expert LLM (upload to HF Hub)',d:'Llama-3/Mistral + QLoRA + Unsloth. Evaluate improvement.',xp:160},{n:'🏆 Quantization Benchmark Report',d:'4-bit vs 8-bit vs FP16. Speed, memory, quality tradeoffs. Charts.',xp:100},{n:'Study: GPTQ, GGUF, AWQ, bitsandbytes',d:'Shrink models 4x with minimal quality loss. Critical for deployment.',xp:50}]},{title:'Week 23-24: AI Agents + Full-Stack Apps',xp:500,tasks:[{n:'HuggingFace Agents Course (full)',d:'Free, practical, up-to-date course on building production AI agents.',xp:60},{n:'🏆 Multi-Tool AI Agent',d:'Web search + Python execution + SQL + file reading. Memory. Error handling.',xp:150},{n:'🏆 Full-Stack AI Application (deployed)',d:'Streaming chat + doc upload + RAG + conversation history. Public URL.',xp:160},{n:'🏆 LLM Evaluation System',d:'Faithfulness scoring, hallucination detection, LLM-as-judge.',xp:100},{n:'⭐ Open-Source Contribution — merged PR',d:'HuggingFace Transformers, LangChain, or scikit-learn.',xp:30}]}]},{id:5,icon:'🚀',title:'Production ML',sub:'Phase 5 · 3-4 Weeks',desc:'Separates $150K engineers from $300K+. Deploy, monitor, maintain models in the real world.',xpReward:800,gemReward:10,weeks:[{title:'Week 25-27: MLOps Mastery',xp:500,tasks:[{n:'Made With ML — complete the full course',d:'THE best free MLOps course. End-to-end production ML system.',xp:80},{n:'MLOps Zoomcamp — Modules 1-4',d:'MLflow, Docker, monitoring. Practical and project-based.',xp:80},{n:'Docker: containerize your best ML model',d:'Build, run, push Docker image. Reproducible deployment.',xp:70},{n:'FastAPI: build production model serving API',d:'Health checks, logging, error handling, input validation.',xp:70},{n:'CI/CD: GitHub Actions pipeline',d:'Automated testing + deployment triggered on every push.',xp:60},{n:'Experiment tracking: W&B or MLflow',d:'Every training run logged. Compare experiments. Track metrics.',xp:60},{n:'🏆 Containerized ML Pipeline (deployed on Render)',d:'Docker + FastAPI + CI/CD + W&B monitoring. Live and working.',xp:80},{n:'🏆 Model Monitoring Dashboard',d:'Data drift detection, prediction logging, Streamlit dashboard.',xp:70}]}]},{id:6,icon:'👑',title:'Capstone + Job Hunt',sub:'Phase 6 · 2-3 Weeks',desc:'Your magnum opus. One project combining everything. The centerpiece of every interview.',xpReward:1000,gemReward:20,weeks:[{title:'Week 28-30: Capstone + Applications',xp:1000,tasks:[{n:'Choose your domain (Healthcare/Finance/Code/Multimodal/Safety)',d:'Generic ML: $150-200K. Domain-specialized: $250-500K+.',xp:50},{n:'🏆 CAPSTONE: Solve a real problem, end-to-end',d:'Real domain, ML/LLMs, clean interface, fully deployed. Your best work.',xp:200},{n:'🏆 CI/CD + monitoring on Capstone',d:'Production-grade pipeline. Drift detection active.',xp:100},{n:'🏆 Architecture diagram + 3-5 min demo video',d:"Professional README. Something you'd proudly show any hiring manager.",xp:80},{n:'🏆 Technical blog post about your Capstone',d:'Document decisions, architecture, lessons learned. Share everywhere.',xp:80},{n:'Polish all 6 GitHub repos to portfolio quality',d:'README, requirements.txt, Dockerfile, tests, notebooks — all clean.',xp:100},{n:'Build portfolio website (GitHub Pages or Vercel)',d:'Showcase all projects with live demo links.',xp:100},{n:"Apply to 50+ companies — it's a numbers game",d:'Send applications daily. Tailor resume. Network. Negotiate everything.',xp:290}]}]}];
+
+const LEVELS=[{l:1,n:'Apprentice Coder',xp:0},{l:2,n:'Script Weaver',xp:500},{l:3,n:'Data Wrangler',xp:1200},{l:4,n:'Algorithm Adept',xp:2500},{l:5,n:'Neural Architect',xp:4500},{l:6,n:'Transformer Sage',xp:7500},{l:7,n:'LLM Sorcerer',xp:12000},{l:8,n:'MLOps Warlord',xp:18000},{l:9,n:'AI Engineer',xp:26000},{l:10,n:'ML Legend',xp:36000}];
+
+const ACHIEVEMENTS=[{id:'first',icon:'⚔️',n:'First Quest',d:'Complete your first task.',c:s=>s.tasks>=1},{id:'p0',icon:'🐍',n:'Snake Charmer',d:'Complete Phase 0: Python Fluency.',c:s=>s.phases.includes(0)},{id:'s3',icon:'🔥',n:'On Fire',d:'Maintain a 3-day streak.',c:s=>s.bestStreak>=3},{id:'s7',icon:'💫',n:'Week Warrior',d:'Maintain a 7-day streak.',c:s=>s.bestStreak>=7},{id:'s30',icon:'⚡',n:'Unstoppable',d:'Maintain a 30-day streak.',c:s=>s.bestStreak>=30},{id:'boss1',icon:'🗡️',n:'Boss Slayer',d:'Defeat your first Boss Battle.',c:s=>s.bosses>=1},{id:'boss5',icon:'💀',n:'Dungeon Crawler',d:'Defeat 5 Boss Battles.',c:s=>s.bosses>=5},{id:'p1',icon:'📐',n:'Math Magician',d:'Complete Phase 1.',c:s=>s.phases.includes(1)},{id:'p2',icon:'🧠',n:'Classical Master',d:'Complete Phase 2.',c:s=>s.phases.includes(2)},{id:'p3',icon:'⚡',n:'Deep Thinker',d:'Complete Phase 3.',c:s=>s.phases.includes(3)},{id:'p4',icon:'🤖',n:'LLM Lord',d:'Complete Phase 4.',c:s=>s.phases.includes(4)},{id:'lv5',icon:'🌟',n:'Rising Star',d:'Reach Level 5.',c:s=>s.level>=5},{id:'lv10',icon:'👑',n:'ML Legend',d:'Reach max Level 10.',c:s=>s.level>=10},{id:'t50',icon:'🎯',n:'Centurion',d:'Complete 50 tasks.',c:s=>s.tasks>=50},{id:'all',icon:'🏆',n:'The Legend',d:'Complete the entire roadmap.',c:s=>s.phases.length>=7}];
+
+const SKILLS=[{icon:'🐍',n:'Python Sorcery',tier:'Foundational',phase:0},{icon:'🌿',n:'Git Mastery',tier:'Foundational',phase:0},{icon:'🗄️',n:'SQL Divination',tier:'Core',phase:1},{icon:'🔢',n:'NumPy Enchantment',tier:'Core',phase:1},{icon:'🐼',n:'Pandas Alchemy',tier:'Core',phase:1},{icon:'⚙️',n:'Algorithm Forging',tier:'Advanced',phase:2},{icon:'📊',n:'Scikit Mastery',tier:'Advanced',phase:2},{icon:'🔥',n:'PyTorch Pyromancy',tier:'Advanced',phase:3},{icon:'🤯',n:'Attention Spell',tier:'Elite',phase:3},{icon:'📚',n:'RAG Conjuration',tier:'Elite',phase:4},{icon:'🎯',n:'LoRA Inscription',tier:'Elite',phase:4},{icon:'🤖',n:'Agent Command',tier:'Elite',phase:4},{icon:'📦',n:'Container Craft',tier:'Master',phase:5},{icon:'🔄',n:'MLOps Ritual',tier:'Master',phase:5},{icon:'🚀',n:'Deployment Rune',tier:'Legendary',phase:6}];
+
+const BOSS_Q={0:[{q:"What's the key difference between a Python list and a tuple?",opts:["Lists are mutable, tuples are immutable","Tuples are faster but hold more items","Lists are for numbers, tuples for strings","No meaningful difference"],a:0,e:"Lists [] are mutable — you can add, remove, or change elements. Tuples () are immutable and can be used as dictionary keys."},{q:"What do *args and **kwargs mean in a Python function?",opts:["A syntax error","*args = extra positional args (tuple); **kwargs = extra keyword args (dict)","*args = keyword args; **kwargs = positional args","Multiplication and power operators"],a:1,e:"*args accepts any number of positional arguments packed into a tuple. **kwargs accepts any number of keyword arguments packed into a dict."},{q:"What is a Python list comprehension best used for?",opts:["Sorting large datasets","Concise single-line list creation from iterables","Removing duplicates","A loop that's always slower"],a:1,e:"[expr for item in iterable if cond] creates a list compactly. Typically faster and more readable than a for-loop + append."}],1:[{q:"What does the dot product of two vectors represent?",opts:["The sum of the vectors","Directional alignment — how much one vector points toward another: |a||b|cos(θ)","The cross product","Their average"],a:1,e:"dot(a,b) = |a||b|cos(θ). For unit vectors: pure alignment. Zero = perpendicular. 1 = same direction. -1 = opposite."},{q:"What is gradient descent?",opts:["Calculates the gradient","Minimizes a function by repeatedly stepping opposite to the gradient","Finds the maximum of a function","Sorts data by gradient"],a:1,e:"Compute the gradient (direction of steepest ascent), subtract it × learning rate to step toward the minimum. Used to train virtually every ML model."},{q:"SQL: WHERE vs HAVING — what's the real difference?",opts:["They're synonyms","WHERE filters rows before aggregation; HAVING filters groups after GROUP BY","HAVING is for strings; WHERE for numbers","WHERE is always faster"],a:1,e:"WHERE filters individual rows BEFORE any GROUP BY. HAVING filters groups AFTER aggregation. You can't use aggregate functions in WHERE."}],2:[{q:"What is the bias-variance tradeoff?",opts:["Speed vs accuracy","High bias = underfitting (too simple); high variance = overfitting. Balance both.","Bias is always bad","A bias in the training dataset"],a:1,e:"Total error ≈ bias² + variance + noise. Underfitting = high bias. Overfitting = high variance. The art of ML is balancing them."},{q:"Why does XGBoost dominate Kaggle tabular competitions?",opts:["Uses the most CPU","Gradient boosting + regularization + handles missing values + optimized C++","Always achieves 100% accuracy","Requires no tuning"],a:1,e:"Sequential boosting corrects residual errors. Built-in L1/L2 regularization prevents overfitting. Handles missing data natively. Extremely optimized."},{q:"Precision vs Recall — the real difference?",opts:["Same metric, different names","Precision = TP/(TP+FP): quality. Recall = TP/(TP+FN): coverage. F1 balances both.","Precision = speed; recall = accuracy","Recall is always numerically higher"],a:1,e:"Precision: of all I flagged positive, how many were? (avoids false alarms). Recall: of all real positives, how many did I find? (avoids misses)."}],3:[{q:"What is backpropagation, mechanically?",opts:["Moving weights backward","The chain rule applied recursively to compute loss gradients for all weights","A network architecture","Random weight initialization"],a:1,e:"Backprop flows the loss gradient backward through each layer, multiplying by local Jacobians (chain rule). Computes ∂L/∂w for every weight efficiently."},{q:"The core innovation of Transformer self-attention?",opts:["Efficient convolutions","Every token attends to every other token — long-range dependencies in one layer","Sequential processing like RNN","Just more parameters"],a:1,e:"Q·Kᵀ→softmax→·V for all token pairs simultaneously. Every token sees full context in O(1) layers. RNNs need O(n) steps and forget distant tokens."},{q:"What does a ResNet skip connection solve?",opts:["No performance difference","Adds input to output (F(x)+x), guaranteeing gradient flow in deep networks where gradients vanish","Removes layers","Only useful in NLP"],a:1,e:"In very deep networks, gradients vanish. The identity shortcut ensures gradient magnitude ≥ 1 through the skip path. Enabled training 1000+ layer networks."}],4:[{q:"Why is RAG preferred over fine-tuning for enterprise knowledge tasks?",opts:["RAG is faster to train","RAG retrieves at inference — knowledge stays current, no retraining, answers cite sources","RAG always gives better answers","They're the same"],a:1,e:"Fine-tuning bakes knowledge into weights — expensive, goes stale. RAG retrieves → injects into context → generates grounded, citable answers."},{q:"What is LoRA and why does it enable fine-tuning on consumer hardware?",opts:["Low-Rank Adaptation: freeze original weights, inject tiny trainable rank-r matrices, merge at inference","Permanently reduces model size to 10%","Compresses embeddings","Only for image models"],a:0,e:"ΔW = A·B where A is (d×r) and B is (r×d). With r=16 vs rank 4096, you train ~0.5% of parameters. Enables fine-tuning Llama-70B on a consumer GPU."},{q:"What distinguishes an LLM agent from a RAG chatbot?",opts:["No fundamental difference","An agent uses tools, plans multi-step tasks, observes results, loops — RAG does a single retrieve-then-generate","Agents use more memory","RAG is always better"],a:1,e:"RAG: retrieve → generate (one-shot). Agent (ReAct loop): reason → choose tool → execute → observe → reason again. Agents can chain multiple tool calls."}],5:[{q:"What is data drift and why does it degrade production models?",opts:["Server downtime","Input distributions change over time, making predictions unreliable with no visible error","A code bug during deployment","Only affects image models"],a:1,e:"A model trained in January may fail by December if distributions shift. Without monitoring you won't know. Track feature and prediction distributions vs. training baseline."},{q:"Why is Docker essential for production ML?",opts:["Makes inference faster","Packages code + deps + runtime into a unit that runs identically in dev, staging, and prod","Required by cloud providers","Reduces GPU memory"],a:1,e:"'Works on my machine' fails in production. Docker: build once, run identically anywhere. Enables horizontal scaling, rolling deployments, and clean CI/CD."}],6:[{q:"Real-time fraud at 10,000 TPS — what matters most?",opts:["Highest training accuracy","Low-latency inference (<50ms), horizontal scaling, online learning, monitoring, graceful degradation","Most complex model","Batch-process daily"],a:1,e:"Latency is king. Model must live in memory. Scale horizontally. Feedback loop for adaptation. Monitor drift — fraud patterns evolve constantly."},{q:"What makes an ML portfolio project impressive to hiring managers?",opts:["Most novel architecture","Solves a real problem, measurable results, deployed, shows full lifecycle with documented decisions","As many models as possible","Highest Kaggle ranking"],a:1,e:"Managers want: (1) Why this problem? (2) Why this data approach? (3) Why this model? (4) Real metrics. (5) Deployment. (6) What you'd improve. Deployed + documented > 20 Jupyter notebooks."}]};
+/* ══ STATE ══════════════════════════════════════════════════════════════ */
+const SK = 'mlq_v7'; // same key as phone version — shared progress
+const ds = () => ({
+  xp:0,gems:0,level:1,streak:0,bestStreak:0,lastLogin:null,
+  tasks:0,bosses:0,doneTasks:{},phases:[],achievements:[],
+  quizCorrect:0,quizTotal:0,dark:false
+});
+let S = ds();
+function load(){ try{ const r=localStorage.getItem(SK); if(r) S={...ds(),...JSON.parse(r)} }catch(e){ S=ds() } }
+function save(){ try{ localStorage.setItem(SK, JSON.stringify(S)) }catch(e){} }
+
+/* ══ THEME ══════════════════════════════════════════════════════════════ */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', S.dark?'dark':'light');
+  const ico = S.dark ? '☀️' : '🌙';
+  const lbl = S.dark ? 'Light mode' : 'Dark mode';
+  const dmBtn = document.getElementById('dm-btn');
+  if(dmBtn) dmBtn.textContent = ico;
+  const sbDm = document.getElementById('sb-dm');
+  if(sbDm) sbDm.innerHTML = ico + ' ' + lbl;
+}
+function toggleDark(){ S.dark=!S.dark; save(); applyTheme() }
+
+/* ══ LEVEL ══════════════════════════════════════════════════════════════ */
+function lvInfo(xp){
+  let c=LEVELS[0], n=LEVELS[1];
+  for(let i=LEVELS.length-1;i>=0;i--){ if(xp>=LEVELS[i].xp){ c=LEVELS[i]; n=LEVELS[i+1]||null; break } }
+  return {c, n};
+}
+
+/* ══ HERO ════════════════════════════════════════════════════════════════ */
+function updateHero(){
+  const {c,n} = lvInfo(S.xp); S.level = c.l;
+  const pct = n ? Math.min(100, Math.round((S.xp-c.xp)/(n.xp-c.xp)*100)) : 100;
+  const cur = n ? (S.xp-c.xp).toLocaleString() : '-';
+  const nxt = n ? (n.xp-c.xp).toLocaleString() : 'MAX';
+  // top bar
+  document.getElementById('t-badge').textContent   = S.level;
+  document.getElementById('t-xp-name').textContent = c.n;
+  document.getElementById('t-xp-fill').style.width = pct+'%';
+  document.getElementById('t-xp-lbl').textContent  = cur+' / '+nxt+' XP';
+  document.getElementById('t-streak').textContent  = S.streak;
+  document.getElementById('t-gems').textContent    = S.gems;
+  document.getElementById('t-xp').textContent      = S.xp.toLocaleString();
+  // sidebar streak
+  document.getElementById('sb-streak-val').textContent = S.streak;
+  // sidebar phase mini-list
+  renderSbPhases();
+}
+
+function addXP(amt, src){
+  const old = S.level;
+  S.xp += amt; const {c} = lvInfo(S.xp); S.level = c.l;
+  save(); updateHero();
+  sfxXP();
+  toast('+'+amt+' XP — '+src, 'xp');
+  if(S.level > old){
+    toast('🎉 Level up! '+c.n, 'lvl');
+    sfxLevelUp();
+    const b = document.getElementById('t-badge');
+    b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+    checkAch();
+  }
+}
+function subXP(amt){ S.xp=Math.max(0,S.xp-amt); const {c}=lvInfo(S.xp); S.level=c.l; save(); updateHero() }
+function addGems(n){ S.gems+=n; save(); updateHero() }
+function subGems(n){ S.gems=Math.max(0,S.gems-n); save(); updateHero() }
+
+/* ══ NAV ═════════════════════════════════════════════════════════════════ */
+let curView = 'learn';
+const VIEWS = { learn:'v-learn', skills:'v-skills', trophies:'v-trophies', stats:'v-stats' };
+
+function navTo(view, btn){
+  if(curView === view) return;
+  sfxClick();
+  curView = view;
+  document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  Object.entries(VIEWS).forEach(([k,id]) => {
+    document.getElementById(id).classList.toggle('active', k===view);
+  });
+  if(view==='skills')   renderSkills();
+  if(view==='trophies') renderTrophies();
+  if(view==='stats')    renderStats();
+}
+
+/* ══ SIDEBAR PHASE LIST ═════════════════════════════════════════════════ */
+function renderSbPhases(){
+  const el = document.getElementById('sb-phase-list'); if(!el) return;
+  el.innerHTML = PHASES.map((p,i) => {
+    const total = p.weeks.reduce((s,w)=>s+w.tasks.length,0);
+    const done  = phaseDone(p);
+    const pct   = total>0 ? Math.round(done/total*100) : 0;
+    const col   = PHASE_COLORS[i];
+    return `<div class="sb-phase-row" onclick="navTo('learn',document.getElementById('sb-learn'));scrollToPhase(${i})">
+      <div class="sb-ph-ico">${p.icon}</div>
+      <div class="sb-ph-name">${esc(p.title)}</div>
+      <div class="sb-ph-bar"><div class="sb-ph-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="sb-ph-pct" style="color:${col}">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function scrollToPhase(i){
+  const el = document.getElementById('phase-banner-'+i);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ══ PATH HELPERS ════════════════════════════════════════════════════════ */
+function taskKey(pid,wi,ti){ return pid+'_'+wi+'_'+ti }
+function phaseDone(p){ return p.weeks.reduce((s,w,wi)=>s+w.tasks.filter((_,ti)=>S.doneTasks[taskKey(p.id,wi,ti)]).length,0) }
+
+/* ══ RENDER PATH COLUMN ═════════════════════════════════════════════════ */
+let selectedPhase = null, selectedWeek = null;
+
+function renderPathHeader(){
+  const hdr = document.getElementById('path-header'); if(!hdr) return;
+  const total = PHASES.reduce((s,p)=>s+p.weeks.reduce((a,w)=>a+w.tasks.length,0),0);
+  const done  = S.tasks;
+  const pct   = total>0 ? Math.round(done/total*100) : 0;
+  const {c}   = lvInfo(S.xp);
+  const greetings = ['Keep going!', 'Crushing it!', 'Stay consistent!', 'Great progress!', 'One task at a time!'];
+  const greet = greetings[new Date().getDay() % greetings.length];
+  hdr.innerHTML = `<div class="path-header-title">Learning Path</div>
+    <div class="overall-card" style="margin-top:10px">
+      <div class="oc-owl">🦉</div>
+      <div class="oc-body">
+        <div class="oc-title">${greet}</div>
+        <div class="oc-sub">${esc(c.n)} · Lv ${S.level}${S.streak>0?' · 🔥 '+S.streak+' day streak':''}</div>
+      </div>
+      <div class="oc-badge">${pct}%<small>done</small></div>
+    </div>`;
+}
+
+function renderPath(){
+  const el = document.getElementById('path-list'); if(!el) return;
+  renderPathHeader();
+  let h = '';
+  PHASES.forEach((p,i) => {
+    const unlocked  = i===0 || S.phases.includes(i-1);
+    const completed = S.phases.includes(p.id);
+    const col   = PHASE_COLORS[i], dark = PHASE_DARK[i];
+    const pdone = phaseDone(p);
+    const ptotal = p.weeks.reduce((s,w)=>s+w.tasks.length,0);
+    h += `<div class="phase-section">
+      <div class="phase-banner" id="phase-banner-${i}">
+        <div class="pb-icon">${p.icon}</div>
+        <div class="pb-body">
+          <div class="pb-title">${esc(p.title)}</div>
+          <div class="pb-sub">${esc(p.sub)} · ${pdone}/${ptotal}</div>
+        </div>
+        <div class="pb-xp" style="background:${col};border-color:${dark};box-shadow:0 2px 0 ${dark}">⚡${p.xpReward}</div>
+      </div>
+      <div class="week-nodes">`;
+    // week nodes
+    p.weeks.forEach((w,wi) => {
+      const done  = w.tasks.filter((_,ti)=>S.doneTasks[taskKey(p.id,wi,ti)]).length;
+      const all   = done===w.tasks.length;
+      const pct   = w.tasks.length>0 ? Math.round(done/w.tasks.length*100) : 0;
+      const sel   = selectedPhase===i && selectedWeek===wi;
+      let cls = unlocked ? (all ? 'done' : '') : 'locked';
+      h += `<div class="wnode ${cls} ${sel?'selected':''}" id="wnode-${i}-${wi}"
+        ${unlocked?`onclick="selectWeek(${i},${wi})" onkeydown="if(event.key==='Enter')selectWeek(${i},${wi})"`:''} 
+        role="${unlocked?'button':'listitem'}" ${unlocked?'tabindex="0"':''}
+        aria-label="${esc(w.title)}">
+        <div class="wnode-circle">${all?'✓':p.icon}</div>
+        <div class="wnode-info">
+          <div class="wnode-title">${esc(w.title)}</div>
+          <div class="wnode-meta">${done}/${w.tasks.length} tasks</div>
+          <div class="wnode-prog"><div class="wnode-prog-fill" style="width:${pct}%;background:${col}"></div></div>
+        </div>
+        <div class="wnode-xp">+${w.xp} XP</div>
+      </div>`;
+    });
+    // boss node
+    if(BOSS_Q[p.id]){
+      const bsel = selectedPhase===i && selectedWeek===-1;
+      const cls = unlocked?'boss':'boss locked';
+      h += `<div class="wnode ${cls} ${bsel?'selected':''}" id="wnode-${i}-boss"
+        ${unlocked?`onclick="selectWeek(${i},-1)" onkeydown="if(event.key==='Enter')selectWeek(${i},-1)"`:''}
+        ${unlocked?'tabindex="0"':''}>
+        <div class="wnode-circle">⚔️</div>
+        <div class="wnode-info">
+          <div class="wnode-title">⚔️ Boss Battle</div>
+          <div class="wnode-meta">+200 XP · +1 💎</div>
+        </div>
+      </div>`;
+    }
+    h += `</div></div>`;
+  });
+  el.innerHTML = h;
+}
+
+/* ══ SELECT WEEK → SHOW DETAIL ══════════════════════════════════════════ */
+function selectWeek(pi, wi){
+  sfxSelect();
+  selectedPhase = pi; selectedWeek = wi;
+  // update selected state on nodes
+  document.querySelectorAll('.wnode').forEach(n => n.classList.remove('selected'));
+  const nodeId = wi===-1 ? `wnode-${pi}-boss` : `wnode-${pi}-${wi}`;
+  const nd = document.getElementById(nodeId);
+  if(nd) nd.classList.add('selected');
+  // show detail
+  document.getElementById('detail-empty').style.display = 'none';
+  const dp = document.getElementById('detail-panel');
+  dp.style.display = 'block';
+  if(wi===-1){
+    renderBossDetail(pi);
+  } else {
+    renderWeekDetail(pi, wi);
+  }
+  dp.style.animation = 'slideIn .22s var(--ease) both';
+}
+
+/* ── Boss shortcut from path ─────────────────────────────── */
+function renderBossDetail(pi){
+  const p = PHASES[pi], col = PHASE_COLORS[pi];
+  const dp = document.getElementById('detail-panel');
+  dp.innerHTML = `<div style="padding:28px 24px">
+    <div class="boss-card" onclick="openBoss(${p.id})">
+      <div class="boss-ico">⚔️</div>
+      <div class="boss-txt">
+        <div class="boss-title">Boss Battle: ${esc(p.title)}</div>
+        <div class="boss-sub">Answer questions — defeat the boss to earn 200 XP + 1 💎</div>
+      </div>
+      <div class="boss-arr">›</div>
+    </div>
+    <div style="margin-top:24px;padding:20px;background:var(--bg);border:2px solid var(--brd);border-radius:16px">
+      <p style="font-size:13px;font-weight:600;color:var(--txt2);line-height:1.7">
+        Boss Battles test your understanding of ${esc(p.title)}. Answer ${(BOSS_Q[p.id]||[]).length} questions correctly to defeat the boss and claim your reward.
+      </p>
+    </div>
+  </div>`;
+}
+
+/* ── Week detail ─────────────────────────────────────────── */
+function renderWeekDetail(pi, openWi){
+  const p   = PHASES[pi];
+  const col = PHASE_COLORS[pi], dark = PHASE_DARK[pi];
+  const total = p.weeks.reduce((s,w)=>s+w.tasks.length,0);
+  const done  = phaseDone(p);
+  const pct   = total>0 ? Math.round(done/total*100) : 0;
+  const dp    = document.getElementById('detail-panel');
+
+  // tabs HTML
+  const tabs = p.weeks.map((w,wi) => {
+    const wd   = w.tasks.filter((_,ti)=>S.doneTasks[taskKey(p.id,wi,ti)]).length;
+    const wall = wd===w.tasks.length;
+    return `<button class="dh-tab ${wi===openWi?'active':''}" onclick="switchWeekTab(${pi},${wi})" id="tab-${pi}-${wi}">
+      ${wall?'✓ ':''} Week ${wi+1}
+    </button>`;
+  }).join('');
+
+  dp.innerHTML = `
+    <div class="detail-header" id="detail-hdr-${pi}">
+      <div class="dh-top">
+        <div class="dh-icon" style="background:${col}18">${p.icon}</div>
+        <div class="dh-body">
+          <div class="dh-phase" style="color:${col}">${esc(p.sub)}</div>
+          <div class="dh-title">${esc(p.title)}</div>
+          <div class="dh-desc">${esc(p.desc)}</div>
+        </div>
+      </div>
+      <div class="dh-meta">
+        <div class="dh-chip" style="color:${col};border-color:${col};background:${col}18">⚡ ${p.xpReward} XP on completion</div>
+        <div class="dh-chip" style="color:${dark};border-color:${dark};background:${col}12">💎 ${p.gemReward} gems</div>
+        ${S.phases.includes(p.id) ? '<div class="dh-chip" style="color:var(--gd);border-color:var(--g);background:var(--gll)">✓ Phase Complete</div>' : ''}
+      </div>
+      <div class="dh-prog">
+        <div class="dh-prog-bar"><div class="dh-prog-fill" id="dh-fill-${pi}" style="width:${pct}%;background:${col}"></div></div>
+        <div class="dh-prog-pct" id="dh-pct-${pi}" style="color:${col}">${pct}% · ${done}/${total}</div>
+      </div>
+      <div class="dh-tabs" id="dh-tabs-${pi}">${tabs}</div>
+    </div>
+    <div class="detail-body" id="detail-tasks-${pi}">
+      ${renderWeekTasks(p, openWi)}
+    </div>`;
+}
+
+function switchWeekTab(pi, wi){
+  selectedWeek = wi;
+  // update path node selection
+  document.querySelectorAll('.wnode').forEach(n=>n.classList.remove('selected'));
+  const nd = document.getElementById(`wnode-${pi}-${wi}`);
+  if(nd) nd.classList.add('selected');
+  // update tab active state
+  const tabsEl = document.getElementById(`dh-tabs-${pi}`);
+  if(tabsEl) tabsEl.querySelectorAll('.dh-tab').forEach((t,i)=>t.classList.toggle('active',i===wi));
+  // re-render tasks
+  const tasksEl = document.getElementById(`detail-tasks-${pi}`);
+  if(tasksEl) tasksEl.innerHTML = renderWeekTasks(PHASES[pi], wi);
+}
+
+function renderWeekTasks(p, wi){
+  const w    = p.weeks[wi];
+  const done = w.tasks.filter((_,ti)=>S.doneTasks[taskKey(p.id,wi,ti)]).length;
+  const all  = done===w.tasks.length;
+  const hasBoss = !!BOSS_Q[p.id] && wi===p.weeks.length-1;
+  return `<div class="week-title-row">
+      <div class="week-title-txt">${esc(w.title)}</div>
+      ${all ? '<div class="week-done-badge">✓ Week Complete</div>' : `<span style="font-size:12px;font-weight:700;color:var(--txt3)">${done}/${w.tasks.length} done · +${w.xp} XP</span>`}
+    </div>
+    ${w.tasks.map((t,ti) => renderTask(p.id, wi, ti, t)).join('')}
+    ${hasBoss ? `<div class="boss-card" onclick="openBoss(${p.id})">
+      <div class="boss-ico">⚔️</div>
+      <div class="boss-txt"><div class="boss-title">Boss Battle</div><div class="boss-sub">Prove your knowledge — earn 200 XP + 1 💎</div></div>
+      <div class="boss-arr">›</div>
+    </div>` : ''}`;
+}
+
+function renderTask(pid, wi, ti, t){
+  const key  = taskKey(pid,wi,ti), done = !!S.doneTasks[key];
+  const proj = t.n.startsWith('🏆')||t.n.startsWith('⭐');
+  return `<div class="task ${done?'done':''} ${proj?'proj':''}"
+    id="tr${pid}-${wi}-${ti}"
+    onclick="toggleTask(${pid},${wi},${ti})" role="checkbox" aria-checked="${done}" tabindex="0"
+    onkeydown="if(event.key==='Enter'||event.key===' ')toggleTask(${pid},${wi},${ti})">
+    <div class="task-cb">
+      <svg class="task-chk" width="14" height="14" viewBox="0 0 14 14">
+        <polyline points="2,7 6,11 12,3" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="task-body">
+      <div class="task-name">${esc(t.n)}</div>
+      <div class="task-desc">${esc(t.d)}</div>
+      <span class="task-xp">+${t.xp} XP</span>
+    </div>
+  </div>`;
+}
+
+/* ══ TOGGLE TASK ════════════════════════════════════════════════════════ */
+function toggleTask(pid, wi, ti){
+  const p   = PHASES.find(ph=>ph.id===pid); if(!p) return;
+  const pi  = PHASES.indexOf(p);
+  const key = taskKey(pid,wi,ti);
+  const t   = p.weeks[wi].tasks[ti];
+  const was = !!S.doneTasks[key];
+
+  if(was){
+    delete S.doneTasks[key];
+    S.tasks = Math.max(0, S.tasks-1);
+    sfxUncheck();
+    subXP(t.xp);
+    uncheckPhase(pi);
+  } else {
+    S.doneTasks[key] = true;
+    S.tasks++;
+    sfxCheck();
+    addXP(t.xp, t.n.substring(0,40));
+    checkPhase(pi);
+    checkAch();
+    confetti(18);
+  }
+
+  /* ── BUG FIX: toggle class only — no inline style mutation ── */
+  const row = document.getElementById(`tr${pid}-${wi}-${ti}`);
+  if(row){
+    const now = !!S.doneTasks[key];
+    row.classList.toggle('done', now);
+    row.setAttribute('aria-checked', String(now));
+    // CSS .task.done .task-name handles text-decoration entirely
+  }
+
+  // refresh path column node progress
+  refreshPathNode(pi, wi, p);
+  // refresh detail header progress
+  refreshDetailHeader(pi);
+  // refresh path header overall progress
+  renderPathHeader();
+  renderSbPhases();
+  // refresh week tab label (done checkmark)
+  refreshWeekTab(pi, wi, p);
+}
+
+function refreshPathNode(pi, wi, p){
+  const nd = document.getElementById(`wnode-${pi}-${wi}`); if(!nd) return;
+  const w    = p.weeks[wi];
+  const done = w.tasks.filter((_,ti)=>S.doneTasks[taskKey(p.id,wi,ti)]).length;
+  const all  = done===w.tasks.length;
+  const pct  = w.tasks.length>0 ? Math.round(done/w.tasks.length*100) : 0;
+  const meta = nd.querySelector('.wnode-meta');
+  if(meta) meta.textContent = done+'/'+w.tasks.length+' tasks';
+  const bar = nd.querySelector('.wnode-prog-fill');
+  if(bar) bar.style.width = pct+'%';
+  nd.classList.toggle('done', all);
+  nd.classList.remove('active'); // no longer used — clean class model
+  const circ = nd.querySelector('.wnode-circle');
+  if(circ) circ.textContent = all ? '✓' : p.icon;
+  // update phase banner task count
+  const banner = document.getElementById(`phase-banner-${pi}`);
+  if(banner){
+    const sub = banner.querySelector('.pb-sub');
+    if(sub){
+      const total = p.weeks.reduce((s,w)=>s+w.tasks.length,0);
+      const pdone = phaseDone(p);
+      sub.textContent = p.sub+' · '+pdone+'/'+total;
+    }
+  }
+}
+
+function refreshDetailHeader(pi){
+  const p   = PHASES[pi], col = PHASE_COLORS[pi];
+  const total = p.weeks.reduce((s,w)=>s+w.tasks.length,0);
+  const done  = phaseDone(p);
+  const pct   = total>0 ? Math.round(done/total*100) : 0;
+  const fillEl = document.getElementById(`dh-fill-${pi}`);
+  const pctEl  = document.getElementById(`dh-pct-${pi}`);
+  if(fillEl){ fillEl.style.width=pct+'%'; fillEl.style.background=col }
+  if(pctEl){ pctEl.style.color=col; pctEl.textContent=pct+'% · '+done+'/'+total }
+}
+
+function refreshWeekTab(pi, wi, p){
+  const tab = document.getElementById(`tab-${pi}-${wi}`); if(!tab) return;
+  const w    = p.weeks[wi];
+  const done = w.tasks.filter((_,ti)=>S.doneTasks[taskKey(p.id,wi,ti)]).length;
+  const all  = done===w.tasks.length;
+  tab.textContent = (all?'✓ ':'')+' Week '+(wi+1);
+  if(tab.classList.contains('active')) tab.className='dh-tab active';
+}
+
+/* ══ PHASE COMPLETION ═══════════════════════════════════════════════════ */
+function checkPhase(i){
+  const p = PHASES[i];
+  const total = p.weeks.reduce((s,w)=>s+w.tasks.length,0), done=phaseDone(p);
+  if(done===total && !S.phases.includes(p.id)){
+    S.phases.push(p.id);
+    addXP(p.xpReward, p.title+' complete!');
+    addGems(p.gemReward); save();
+    toast('🎊 Phase Complete! '+p.title+' — +'+p.gemReward+'💎','ach');
+    confetti(70); sfxPhaseComplete(); checkAch();
+    // refresh detail to show completion chip
+    if(selectedPhase===i) renderWeekDetail(i, selectedWeek);
+  }
+}
+function uncheckPhase(i){
+  const p=PHASES[i], done=phaseDone(p), total=p.weeks.reduce((s,w)=>s+w.tasks.length,0);
+  const idx=S.phases.indexOf(p.id);
+  if(idx!==-1 && done<total){
+    S.phases.splice(idx,1); subXP(p.xpReward); subGems(p.gemReward);
+    toast('Phase incomplete — bonus reversed','xp'); recheckAch();
+  }
+}
+
+/* ══ BOSS BATTLE ════════════════════════════════════════════════════════ */
+const L = {qs:[],idx:0,hp:100,ans:false,rewarded:false,phaseId:null};
+
+function openBoss(phaseId){
+  const qs=BOSS_Q[phaseId]; if(!qs||!qs.length) return;
+  const p = PHASES.find(ph=>ph.id===phaseId);
+  L.qs=[...qs].sort(()=>Math.random()-.5); L.idx=0; L.hp=100;
+  L.ans=false; L.rewarded=false; L.phaseId=phaseId;
+  document.getElementById('boss-modal-title').textContent = '⚔️ Boss: '+p.title;
+  document.getElementById('boss-sub').textContent = 'Answer '+L.qs.length+' questions to defeat the boss';
+  syncHP();
+  sfxBossOpen();
+  document.getElementById('boss-overlay').classList.add('open');
+  renderQ();
+}
+function closeBoss(){
+  document.getElementById('boss-overlay').classList.remove('open');
+  document.getElementById('boss-body').innerHTML='';
+}
+function syncHP(){
+  const pct=Math.max(0,L.hp);
+  document.getElementById('hp-fill').style.width=pct+'%';
+  document.getElementById('hp-pct').textContent=pct+'%';
+}
+function renderQ(){
+  syncHP();
+  const body=document.getElementById('boss-body');
+  if(L.idx>=L.qs.length){
+    if(!L.rewarded){
+      L.rewarded=true; S.bosses++; save();
+      addXP(200,'Boss Battle Victory!'); addGems(1); checkAch(); confetti(80); sfxBossVictory();
+    }
+    body.innerHTML=`<div class="boss-result">
+      <span class="boss-trophy">🏆</span>
+      <div class="boss-r-title">Boss Defeated!</div>
+      <div class="boss-r-desc">You answered all questions and proved your mastery.</div>
+      <div class="boss-r-pill">⚡ +200 XP &nbsp;·&nbsp; 💎 +1 gem</div>
+    </div>
+    <button class="btn-next" onclick="closeBoss()">Continue →</button>`;
+    return;
+  }
+  L.ans=false; const q=L.qs[L.idx];
+  body.innerHTML=`<div class="q-card">
+    <div class="q-num">Question ${L.idx+1} of ${L.qs.length}</div>
+    <div class="q-text">${esc(q.q)}</div>
+    <div class="q-opts">
+      ${q.opts.map((o,i)=>`<button class="q-opt" id="qo${i}" onclick="pickAns(${i})">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}
+    </div>
+    <div class="q-fb" id="q-fb"></div>
+    <button class="q-next" id="q-next" onclick="nextQ()">Next →</button>
+  </div>`;
+}
+function pickAns(idx){
+  if(L.ans) return; L.ans=true;
+  const q=L.qs[L.idx], ok=idx===q.a;
+  S.quizTotal++; if(ok) S.quizCorrect++; save();
+  document.getElementById('boss-body').querySelectorAll('.q-opt').forEach(b=>b.disabled=true);
+  document.getElementById('qo'+idx).classList.add(ok?'correct':'wrong');
+  if(!ok) document.getElementById('qo'+q.a).classList.add('correct');
+  const perQ=Math.floor(100/L.qs.length);
+  L.hp=Math.max(0,L.hp-(ok?perQ:Math.min(perQ*2,100))); syncHP();
+  if(ok) sfxCorrect(); else sfxWrong();
+  const fb=document.getElementById('q-fb');
+  fb.className='q-fb show '+(ok?'ok':'bad');
+  fb.textContent=(ok?'✓ Correct! ':'✗ Not quite. ')+q.e;
+  document.getElementById('q-next').classList.add('show');
+}
+function nextQ(){ L.idx++; renderQ() }
+document.addEventListener('click',e=>{if(e.target.classList.contains('overlay'))e.target.classList.remove('open')});
+
+/* ══ STREAK ═════════════════════════════════════════════════════════════ */
+function today(){ return new Date().toDateString() }
+function openStreak(){
+  const claimed = S.lastLogin===today();
+  document.getElementById('str-sub').textContent = claimed?'🔥 '+S.streak+'-day streak! See you tomorrow.':'Keep your streak alive!';
+  const btn=document.getElementById('claim-btn');
+  btn.disabled=claimed; btn.textContent=claimed?'Already claimed!':'Claim reward (+100 XP)';
+  document.getElementById('s-days').innerHTML=Array.from({length:7},(_,i)=>{
+    const d=i+1,lit=S.streak>=d,nxt=!lit&&d===S.streak+1;
+    return`<div class="sday ${lit?'lit':''} ${nxt?'nxt':''}">${d}</div>`;
+  }).join('');
+  document.getElementById('streak-overlay').classList.add('open');
+}
+function claimDaily(){
+  if(S.lastLogin===today()) return;
+  const yest=new Date(Date.now()-86400000).toDateString();
+  S.streak=S.lastLogin===yest?S.streak+1:1;
+  S.bestStreak=Math.max(S.bestStreak,S.streak);
+  S.lastLogin=today(); save();
+  sfxStreak();
+  addXP(Math.min(200,100+S.streak*10),'Day '+S.streak+' Streak!');
+  confetti(35); checkAch(); openStreak();
+}
+function closeOverlay(id){ document.getElementById(id).classList.remove('open') }
+
+/* ══ ACHIEVEMENTS ═══════════════════════════════════════════════════════ */
+function checkAch(){
+  let ch=false;
+  ACHIEVEMENTS.forEach(a=>{
+    if(!S.achievements.includes(a.id)&&a.c(S)){ S.achievements.push(a.id); ch=true; sfxAchievement(); toast('🏆 Achievement: '+a.n+'!','ach') }
+  });
+  if(ch){ save(); renderTrophies() }
+}
+function recheckAch(){
+  const b=S.achievements.length;
+  S.achievements=S.achievements.filter(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);return a?a.c(S):false});
+  if(S.achievements.length!==b){ save(); renderTrophies() }
+}
+function renderTrophies(){
+  const g=document.getElementById('trophy-grid'); if(!g) return;
+  g.innerHTML=ACHIEVEMENTS.map(a=>{
+    const ok=S.achievements.includes(a.id);
+    return`<div class="t-card ${ok?'ok':'no'}">
+      <span class="t-ico">${a.icon}</span>
+      <div class="t-nm">${esc(a.n)}</div>
+      <div class="t-desc">${esc(a.d)}</div>
+      ${ok?'<div class="t-done">✓ Unlocked</div>':''}
+    </div>`;
+  }).join('');
+}
+
+/* ══ SKILLS ═════════════════════════════════════════════════════════════ */
+function renderSkills(){
+  const el=document.getElementById('skills-body'); if(!el) return;
+  const tiers=['Foundational','Core','Advanced','Elite','Master','Legendary'];
+  el.innerHTML=tiers.map(tier=>{
+    const sk=SKILLS.filter(s=>s.tier===tier); if(!sk.length) return'';
+    return`<div class="tier-block">
+      <div class="tier-lbl">${tier}</div>
+      <div class="skill-grid">
+        ${sk.map(s=>{
+          const ok=S.phases.includes(s.phase)||(s.phase===0&&S.tasks>0);
+          return`<div class="sk-card ${ok?'ok':'no'}">
+            <span class="sk-ico">${s.icon}</span>
+            <div class="sk-nm">${esc(s.n)}</div>
+            <div class="sk-st">${ok?'✓ Unlocked':'Phase '+s.phase}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ STATS ═══════════════════════════════════════════════════════════════ */
+function renderStats(){
+  document.getElementById('s-ta').textContent=S.tasks;
+  document.getElementById('s-bo').textContent=S.bosses;
+  document.getElementById('s-sk').textContent=S.bestStreak;
+  document.getElementById('s-ph').textContent=S.phases.length;
+  document.getElementById('s-lv').textContent=S.level;
+  document.getElementById('s-ac').textContent=S.quizTotal>0?Math.round(S.quizCorrect/S.quizTotal*100)+'%':'0%';
+  document.getElementById('s-gm').textContent=S.gems;
+  document.getElementById('s-xp').textContent=S.xp.toLocaleString();
+  const pb=document.getElementById('prog-bars'); if(!pb) return;
+  pb.innerHTML=PHASES.map((p,i)=>{
+    const total=p.weeks.reduce((s,w)=>s+w.tasks.length,0),done=phaseDone(p),pct=total>0?Math.round(done/total*100):0;
+    return`<div class="prog-row">
+      <div class="prog-row-top">
+        <span style="font-weight:800;color:var(--txt)">${p.icon} ${esc(p.title)}</span>
+        <span style="color:var(--txt3);font-size:12px">${done}/${total}</span>
+      </div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${PHASE_COLORS[i]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ CONFETTI ════════════════════════════════════════════════════════════ */
+let confRaf=null;
+function confetti(n){
+  const cv=document.getElementById('confetti'),cx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const cols=['#58cc02','#1cb0f6','#ffc800','#ce82ff','#ff4b4b','#ff9600'];
+  const ps=Array.from({length:n},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height*.35-20,
+    w:5+Math.random()*9,h:9+Math.random()*9,
+    r:Math.random()*Math.PI*2,rd:(Math.random()-.5)*.16,
+    vx:(Math.random()-.5)*6,vy:2+Math.random()*5,
+    col:cols[Math.floor(Math.random()*cols.length)],life:1
+  }));
+  if(confRaf) cancelAnimationFrame(confRaf);
+  function frame(){
+    cx.clearRect(0,0,cv.width,cv.height); let alive=false;
+    ps.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.r+=p.rd;p.vy+=.18;p.life-=.016;
+      if(p.life<=0||p.y>cv.height) return; alive=true;
+      cx.save();cx.globalAlpha=p.life;cx.translate(p.x,p.y);cx.rotate(p.r);
+      cx.fillStyle=p.col;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();
+    });
+    if(alive) confRaf=requestAnimationFrame(frame); else cx.clearRect(0,0,cv.width,cv.height);
+  }
+  frame();
+}
+
+/* ══ TOAST ═══════════════════════════════════════════════════════════════ */
+const TICONS={xp:'⚡',ach:'🏆',lvl:'🎉'};
+function toast(msg,type){
+  const r=document.getElementById('toasts'), t=document.createElement('div');
+  t.className='toast '+(type||'xp');
+  t.innerHTML='<span class="t-i">'+(TICONS[type]||'⚡')+'</span><span>'+esc(msg)+'</span>';
+  r.appendChild(t);
+  setTimeout(()=>{ t.classList.add('hiding'); setTimeout(()=>t.remove(),280) }, 3200);
+}
+
+/* ══ UTIL ════════════════════════════════════════════════════════════════ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
+
+/* ══ SOUND ENGINE ════════════════════════════════════════════════════════
+   Pure Web Audio API — zero external files, zero network requests.
+   All sounds synthesized from oscillators + filters + envelopes.
+   Mutable via the 🔊/🔇 button in the sidebar footer.
+════════════════════════════════════════════════════════════════════════ */
+let _actx = null;
+let _sfxOn = true;
+
+function _ctx(){
+  if(!_actx){
+    try{ _actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; }
+  }
+  // resume if suspended (browser autoplay policy)
+  if(_actx.state==='suspended') _actx.resume();
+  return _actx;
+}
+
+/* Low-level primitive: schedule one note */
+function _note(type, freq, gain, startT, dur, {
+  freqEnd=freq, attack=0.002, decay=0, sustain=1, release=0.05,
+  filterFreq=null, filterQ=1, detune=0
+}={}){
+  const ctx=_ctx(); if(!ctx||!_sfxOn) return;
+  const t=ctx.currentTime+startT;
+  const osc=ctx.createOscillator();
+  const env=ctx.createGain();
+
+  osc.type=type;
+  osc.frequency.setValueAtTime(freq,t);
+  osc.detune.setValueAtTime(detune,t);
+  if(freqEnd!==freq) osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,0.01),t+dur);
+
+  env.gain.setValueAtTime(0,t);
+  env.gain.linearRampToValueAtTime(gain, t+attack);
+  if(decay>0) env.gain.linearRampToValueAtTime(gain*sustain, t+attack+decay);
+  env.gain.setValueAtTime(gain*sustain, t+dur-release);
+  env.gain.linearRampToValueAtTime(0, t+dur);
+
+  let node=osc;
+  if(filterFreq){
+    const flt=ctx.createBiquadFilter();
+    flt.type='lowpass'; flt.frequency.value=filterFreq; flt.Q.value=filterQ;
+    osc.connect(flt); flt.connect(env);
+  } else {
+    osc.connect(env);
+  }
+  env.connect(ctx.destination);
+  osc.start(t); osc.stop(t+dur+0.01);
+}
+
+/* ── SOUNDS ──────────────────────────────────────────────────────────── */
+
+/* Task CHECK — bright satisfying upward ding */
+function sfxCheck(){
+  _note('sine',  520, 0.28, 0,    0.12, {freqEnd:660, attack:0.005, release:0.06});
+  _note('sine',  780, 0.18, 0.06, 0.10, {attack:0.005, release:0.07});
+  _note('triangle',1040,0.10,0.10,0.08, {attack:0.003, release:0.06});
+}
+
+/* Task UNCHECK — soft descending thud */
+function sfxUncheck(){
+  _note('sine', 440, 0.18, 0, 0.12, {freqEnd:280, attack:0.003, release:0.09, filterFreq:900});
+  _note('sine', 220, 0.12, 0.04, 0.10, {freqEnd:160, attack:0.005, release:0.08, filterFreq:600});
+}
+
+/* XP gain — short sparkle ascending arpeggio */
+function sfxXP(){
+  const notes=[330,440,550,660];
+  notes.forEach((f,i)=>{
+    _note('sine', f, 0.15, i*0.055, 0.10, {freqEnd:f*1.02, attack:0.004, release:0.06});
+  });
+}
+
+/* Level up — triumphant ascending fanfare */
+function sfxLevelUp(){
+  const melody=[[523,0],[659,0.10],[784,0.20],[1047,0.33]];
+  melody.forEach(([f,t])=>{
+    _note('square', f,   0.18, t, 0.18, {freqEnd:f, attack:0.01, release:0.10, filterFreq:2400, filterQ:1.5});
+    _note('sine',   f*2, 0.08, t, 0.18, {attack:0.01, release:0.10});
+  });
+  // sustain chord at end
+  [523,659,784,1047].forEach((f,i)=>{
+    _note('sine', f, 0.12, 0.52, 0.35, {attack:0.03, release:0.2, detune:i*2});
+  });
+}
+
+/* Achievement unlock — shimmering chime cascade */
+function sfxAchievement(){
+  const freqs=[880,1109,1318,1760,2093];
+  freqs.forEach((f,i)=>{
+    _note('sine', f, 0.16, i*0.07, 0.22, {attack:0.006, release:0.16, detune:i%2===0?0:5});
+    _note('triangle', f*1.5, 0.06, i*0.07+0.03, 0.15, {attack:0.006, release:0.12});
+  });
+}
+
+/* Phase complete — full victory fanfare */
+function sfxPhaseComplete(){
+  // Bass hit
+  _note('sine', 130, 0.4, 0, 0.18, {freqEnd:100, attack:0.005, release:0.1, filterFreq:400});
+  // Melody: IV–V–I resolution
+  const melody=[[392,0.05],[494,0.18],[587,0.31],[784,0.44],[1047,0.60]];
+  melody.forEach(([f,t])=>{
+    _note('square', f, 0.20, t, 0.20, {attack:0.01, release:0.12, filterFreq:3000});
+    _note('sine',   f, 0.12, t, 0.20, {attack:0.01, release:0.12});
+  });
+  // Final chord bloom
+  [523,659,784,1047,1319].forEach((f,i)=>{
+    _note('sine', f, 0.13, 0.82, 0.50, {attack:0.04, release:0.30, detune:i*3-3});
+  });
+}
+
+/* Boss open — dramatic tense sting */
+function sfxBossOpen(){
+  _note('sawtooth', 110, 0.22, 0,    0.20, {freqEnd:90,  attack:0.01, release:0.15, filterFreq:800,  filterQ:4});
+  _note('sawtooth', 146, 0.16, 0.05, 0.20, {freqEnd:120, attack:0.01, release:0.15, filterFreq:600,  filterQ:4});
+  _note('square',   220, 0.12, 0.12, 0.16, {freqEnd:180, attack:0.01, release:0.12, filterFreq:1200, filterQ:3});
+  _note('sine',      55, 0.30, 0,    0.30, {freqEnd:40,  attack:0.02, release:0.20, filterFreq:200});
+}
+
+/* Quiz correct — bright ping */
+function sfxCorrect(){
+  _note('sine',  880, 0.25, 0,    0.09, {freqEnd:1100, attack:0.004, release:0.06});
+  _note('sine', 1320, 0.18, 0.06, 0.09, {attack:0.004, release:0.07});
+  _note('sine', 1760, 0.10, 0.11, 0.08, {attack:0.004, release:0.07});
+}
+
+/* Quiz wrong — low thud + descend */
+function sfxWrong(){
+  _note('sawtooth', 220, 0.22, 0,    0.14, {freqEnd:140, attack:0.005, release:0.10, filterFreq:600, filterQ:3});
+  _note('sine',     110, 0.18, 0.05, 0.18, {freqEnd:80,  attack:0.005, release:0.14, filterFreq:300});
+}
+
+/* Boss victory — triumphant big finish */
+function sfxBossVictory(){
+  sfxPhaseComplete();
+  // Extra cymbal-like noise burst
+  setTimeout(()=>{
+    const ctx=_ctx(); if(!ctx||!_sfxOn) return;
+    const buf=ctx.createBuffer(1,ctx.sampleRate*0.15,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+    const src2=ctx.createBufferSource();
+    const flt=ctx.createBiquadFilter();
+    const env=ctx.createGain();
+    flt.type='highpass'; flt.frequency.value=6000;
+    env.gain.setValueAtTime(0.25,ctx.currentTime);
+    env.gain.linearRampToValueAtTime(0,ctx.currentTime+0.15);
+    src2.buffer=buf; src2.connect(flt); flt.connect(env); env.connect(ctx.destination);
+    src2.start();
+  }, 820);
+}
+
+/* Streak claim — warm glowing swell */
+function sfxStreak(){
+  const freqs=[261,329,392,523,659];
+  freqs.forEach((f,i)=>{
+    _note('sine', f, 0.18, i*0.08, 0.25, {attack:0.015, release:0.15, detune:i*4});
+    if(i<3) _note('triangle', f*2, 0.07, i*0.08+0.04, 0.18, {attack:0.01, release:0.12});
+  });
+}
+
+/* Nav click — soft click */
+function sfxClick(){
+  _note('sine', 660, 0.12, 0, 0.055, {freqEnd:440, attack:0.002, release:0.04, filterFreq:2000});
+}
+
+/* Select week — subtle pop */
+function sfxSelect(){
+  _note('sine', 520, 0.14, 0, 0.07, {freqEnd:600, attack:0.003, release:0.05});
+  _note('sine', 780, 0.08, 0.03, 0.06, {attack:0.003, release:0.04});
+}
+
+/* ── MUTE TOGGLE ─────────────────────────────────────────────────────── */
+function toggleSound(){
+  _sfxOn = !_sfxOn;
+  const btn = document.getElementById('sfx-btn');
+  if(btn) btn.textContent = _sfxOn ? '🔊' : '🔇';
+  if(_sfxOn){ _ctx(); sfxClick(); }  // resume context on unmute
+}
+
+/* First interaction: browsers block AudioContext until a user gesture.
+   We resume on the very first click anywhere. */
+document.addEventListener('click', ()=>{ _ctx(); }, {once:true, passive:true});
+
+/* ══ INIT ════════════════════════════════════════════════════════════════ */
+load();
+applyTheme();
+updateHero();
+renderPath();
+renderTrophies();
+renderSkills();
+if(S.lastLogin!==today()) setTimeout(openStreak, 900);
+</script>
+</body>
+</html>
